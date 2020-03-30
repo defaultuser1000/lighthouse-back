@@ -1,0 +1,767 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <link href="https://fonts.googleapis.com/css?family=Oswald&display=swap" rel="stylesheet">
+    <title>Lighthouse Order Form</title>
+    <style>
+        .form-box {
+            height: 297mm;
+            width: 210mm;
+            margin: auto;
+            padding: 2mm;
+            font-size: 14px;
+            line-height: 24px;
+            font-family: 'Helvetica', Helvetica, Arial, sans-serif;
+            font-weight: lighter;
+            color: #555;
+        }
+
+        .main-table {
+            /*border: 1px #333333 solid;*/
+            /*padding: 5px;*/
+            width: 100%;
+            height: 100%;
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+
+        .main-table td {
+            /*border: 2px #D84F47 solid;*/
+        }
+
+        .main-table td[class='vertically-top'] {
+            vertical-align: top;
+        }
+
+        #main-options {
+            height: 350px;
+        }
+
+        .first-column {
+            width: 65%;
+        }
+
+        .field-wrap {
+            /*border: 1px #333333 solid;*/
+            width: 100%;
+            margin-bottom: 5px;
+            display: flex;
+        }
+
+        .field-wrap input {
+            outline: 0;
+            border-width: 0 0 1px;
+            border-color: #333333;
+            flex-grow: 1;
+        }
+
+        .order-options {
+            /*padding-top: 5px;*/
+        }
+
+        .left-options {
+            margin-top: 35px;
+        }
+
+        .address-first {
+            margin-bottom: 10px;
+        }
+
+        .address-label {
+            margin-right: 10px;
+        }
+
+        .label {
+            font-size: large;
+            font-family: "Oswald", sans-serif;
+            font-weight: bold;
+            font-style: normal;
+            margin-left: 5px;
+            margin-right: 10px;
+        }
+
+        .logo-container {
+            margin-top: 2px;
+            margin-left: 15px;
+            margin-right: 15px;
+            display: flex;
+            height: 160px;
+        }
+
+        .left-logo-border {
+            border: 0 #D84F47 solid;
+            width: 10%;
+            border-left-width: 1px;
+            border-top-width: 1px;
+        }
+
+        .logo-content {
+            display: inline-block;
+            width: 200px;
+            height: 160px;
+        }
+
+        .logo-content img {
+            margin-left: 20px;
+            margin-right: 5px;
+            width: 160px;
+            height: 160px;
+        }
+
+        .right-logo-border {
+            border: 0 #D84F47 solid;
+            width: 10%;
+            border-right-width: 1px;
+            border-bottom-width: 1px;
+        }
+
+        .contacts {
+            margin-left: 3px;
+        }
+
+        .contacts div {
+            align-items: center;
+            display: flex;
+            margin-top: 5px;
+        }
+
+        .contacts .icon {
+            display: inline-block;
+            height: 100%;
+            white-space: nowrap;
+            text-align: center;
+        }
+
+        .contacts .icon img {
+            vertical-align: middle;
+            width: 24px;
+            height: 24px;
+            max-height: 24px;
+        }
+
+        .contacts .text {
+            display: inline-block;
+            margin-left: 5px;
+            line-height: 1.2;
+            font-size: 10px;
+            font-weight: lighter;
+        }
+
+        .right-options {
+            height: 470px;
+            border: 0 #D84F47 solid;
+            border-left-width: 1px;
+            vertical-align: top;
+            margin-left: 15px;
+            padding-left: 10px;
+            padding-top: 25px;
+        }
+
+        .right-options div.selects {
+            /*border: 1px #333333 solid;*/
+            height: 55px;
+            vertical-align: top;
+        }
+
+        .right-options .label {
+            margin-left: 0;
+        }
+
+        .right-options .option {
+            float: left;
+            width: 50%;
+        }
+
+        .scanner-options {
+            vertical-align: top;
+            width: 86%;
+        }
+
+        .scanner-options div.selects {
+            /*border: 1px #333333 solid;*/
+            height: 55px;
+            vertical-align: top;
+        }
+
+        .scanner-options .option {
+            /*border: 1px #333333 solid;*/
+            float: left;
+            width: 35%;
+        }
+        .scanner-options .option:last-child {
+            width: 55%;
+        }
+
+        .scanner-type-options {
+            vertical-align: top;
+            width: 86%;
+        }
+
+        .scanner-type-options div.selects {
+            /*border: 1px #333333 solid;*/
+            height: 30px;
+            vertical-align: top;
+        }
+
+        .scanner-type-options .option {
+            /*border: 1px #333333 solid;*/
+            float: left;
+            width: 35%;
+        }
+
+        .scan-size-options {
+            vertical-align: top;
+        }
+
+        .scan-size-options div.selects {
+            /*border: 1px #333333 solid;*/
+            height: 55px;
+            vertical-align: top;
+        }
+
+        .scan-size-options .option {
+            /*border: 1px #333333 solid;*/
+            float: left;
+            width: 30%;
+        }
+
+        .scan-size-options .option .description {
+            font-size: 12px;
+        }
+
+        /*Checkboxes of options*/
+        /* Customize the label (the container) */
+        .container {
+            display: block;
+            position: relative;
+            padding-left: 27px;
+            margin-bottom: 2px;
+            font-size: 14px;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        /* Hide the browser's default checkbox */
+        .container input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+
+        /* Create a custom checkbox */
+        .checkmark {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 15px;
+            width: 15px;
+            border: 1px #333333 solid;
+            /*font-family: 'Helvetica', Helvetica, Arial, sans-serif;*/
+            font-style: normal;
+        }
+
+        /* Create the checkmark/indicator (hidden when not checked) */
+        .checkmark:after {
+            content: "";
+            position: absolute;
+            display: none;
+        }
+
+        /* Show the checkmark when checked */
+        .container input:checked ~ .checkmark:after {
+            display: block;
+            left: 4px;
+            top: 2px;
+            width: 5px;
+            height: 8px;
+            border: solid #333333;
+            border-width: 0 2px 2px 0;
+            -webkit-transform: rotate(45deg);
+            -ms-transform: rotate(45deg);
+            transform: rotate(45deg);
+        }
+
+        div.horizontal-line {
+            width: 20%;
+            border: 0 #D84F47 solid;
+            border-bottom-width: 1px;
+            margin: auto auto 10px;
+        }
+
+        #option-package .option:last-child label{
+            padding-left: 21px;
+            font-size: 11px;
+        }
+
+        #option-express .option:last-child {
+            width: 100%;
+        }
+
+        div.vertical-line {
+            z-index: -1;
+            position: absolute;
+            left: 67%;
+            height: 150px;
+            border: 0 #D84F47 solid;
+            border-left-width: 1px;
+            margin-top: -5px;
+        }
+
+        .transit-company {
+            height: 30px;
+            margin-top: 10px;
+            /*margin-bottom: 10px;*/
+        }
+
+        .transit-company .option {
+            width: 30%;
+            float: left;
+        }
+
+        .virtual-table {
+            display: table;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        .virtual-row {
+            display: table-row;
+        }
+
+        .virtual-table-heading {
+            background-color: #EEE;
+            display: table-header-group;
+        }
+
+        .virtual-cell, .virtual-table-head {
+            border: 1px solid #999999;
+            text-align: center;
+            display: table-cell;
+            width: 20%;
+            height: 12.5%;
+        }
+
+        .virtual-table-body {
+            display: table-row-group;
+        }
+
+        .preferences {
+            width: 100%;
+            height: 225px;
+        }
+
+        .preferences textarea {
+            width: 99%;
+            height: 87%;
+            border: 1px #999999 dashed;
+            resize: none;
+            margin: auto;
+        }
+
+        .empty {
+            margin-left: 15px;
+            margin-right: 10px;
+            width: 90%;
+            height: 94%;
+            display: flex;
+        }
+
+        .empty #empty-left {
+            width: 10%;
+            border: 0 #D84F47 solid;
+            border-left-width: 1px;
+            border-bottom-width: 1px;
+        }
+
+        .empty #empty-middle {
+            width: 80%;
+        }
+
+        .empty #empty-right {
+            width: 10%;
+            border: 0 #D84F47 solid;
+            border-right-width: 1px;
+            border-top-width: 1px;
+        }
+    </style>
+</head>
+<body>
+<div class="form-box">
+
+    <table class="main-table">
+        <tr>
+            <td class="first-column">
+                <div class="field-wrap">
+                    <label for="fio" class="label">ФИО</label>
+                    <input id="fio">
+                </div>
+                <div class="field-wrap">
+                    <label for="phone" class="label">Телефон</label>
+                    <input id="phone">
+                </div>
+                <div class="field-wrap">
+                    <label for="mail" class="label">E-mail</label>
+                    <input id="mail">
+                </div>
+                <div class="field-wrap">
+                    <label for="insta" class="label">Instagram</label>
+                    <input id="insta">
+                </div>
+            </td>
+            <td rowspan="2" id="logo-cell" class="vertically-top">
+                <div class="logo-container">
+                    <div class="left-logo-border"></div>
+                    <div class="logo-content">
+                        <img alt="" src="asset/logo_0.5x.png">
+                    </div>
+                    <div class="right-logo-border"></div>
+                </div>
+                <div class="contacts">
+                    <div class="vertical-line"></div>
+                    <div id="address">
+                        <div class="icon"><img src="asset/social_anchor.png"></div>
+                        <div class="text">107045 г. Москва <br>Печатников переулок, 22 <br>Иванец Александр
+                            Александрович
+                        </div>
+                    </div>
+                    <div id="e-mail">
+                        <div class="icon"><img src="asset/social_mail.png"></div>
+                        <div class="text">lighthouselab@mail.ru</div>
+                    </div>
+                    <div id="phone-number">
+                        <div class="icon"><img src="asset/social_phone.png"></div>
+                        <div class="text">+7 913 457 50 07</div>
+                    </div>
+                    <div id="instagram">
+                        <div class="icon"><img src="asset/social_instagram.png"></div>
+                        <div class="text">lighthousefilmlab</div>
+                    </div>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td rowspan="2" class="vertically-top" id="main-options">
+                <div class="left-options">
+                    <span class="label">После выполнения заказа пленку</span>
+                    <div id="option-after-order" class="selects">
+                        <div class="option">
+                            <label class="container">утилизировать
+                                <input type="checkbox">
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                        <div class="option">
+                            <label class="container">сохранить, заберу в течение 3 месяцев
+                                <input type="checkbox">
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                        <div class="option">
+                            <label class="container">отправить после сканирования
+                                <input type="checkbox">
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                        <div class="field-wrap address-first">
+                            <label for="addres-first" class="address-label">По адресу:</label>
+                            <input id="addres-first" type="text">
+                        </div>
+                        <div class="field-wrap">
+                            <input id="addres-second" type="text">
+                        </div>
+                    </div>
+                    <div class="transit-company">
+                        <div class="option">
+                            <label class="container">CDEK
+                                <input type="checkbox">
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                        <div class="option">
+                            <label class="container">Почта России
+                                <input type="checkbox">
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="scanner-options">
+                    <span class="label">Сканер</span>
+                    <div id="option-scanner-order" class="selects">
+                        <div class="option">
+                            <label class="container">Frontier
+                                <input type="checkbox">
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                        <div class="option">
+                            <label class="container">Imacon
+                                <input type="checkbox">
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                        <div class="option">
+                            <label class="container">Noritsu
+                                <input type="checkbox">
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                        <div class="option">
+                            <label class="container">Доверяю выбор сканера вам
+                                <input type="checkbox">
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="scanner-type-options">
+                    <span class="label">Вид сканирования</span>
+                    <div id="option-scanner-type-order" class="selects">
+                        <div class="option">
+                            <label class="container">Basic
+                                <input type="checkbox">
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                        <div class="option">
+                            <label class="container">Premium
+                                <input type="checkbox">
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="scan-size-options">
+                    <span class="label">Размер скана</span>
+                    <div id="option-scanner-size-order" class="selects">
+                        <div class="option">
+                            <label class="container">L
+                                <input type="checkbox">
+                                <span class="checkmark"></span>
+                            </label>
+                            <div class="description">
+                                <div class="line">35мм 2000*2900</div>
+                                <div class="line">120тип 2000*2600</div>
+                            </div>
+                        </div>
+                        <div class="option">
+                            <label class="container">XL
+                                <input type="checkbox">
+                                <span class="checkmark"></span>
+                            </label>
+                            <div class="description">
+                                <div class="line">35мм 3600*5400</div>
+                                <div class="line">120тип 3600*4800</div>
+                            </div>
+                        </div>
+                        <div class="option">
+                            <label class="container">TIFF
+                                <input type="checkbox">
+                                <span class="checkmark"></span>
+                            </label>
+                            <div class="description">
+                                <div class="line">35мм 3600*5400</div>
+                                <div class="line">120тип 3600*4800</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td rowspan="2" class="vertically-top">
+                <div class="right-options">
+                    <span class="label">Оттенок</span>
+                    <div id="option-color-tones" class="selects">
+                        <div class="option">
+                            <label class="container">Теплый
+                                <input type="checkbox">
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                        <div class="option">
+                            <label class="container">Холодный
+                                <input type="checkbox">
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                        <div class="option">
+                            <label class="container">Нейтральный
+                                <input type="checkbox">
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <span class="label">Контраст</span>
+                    <div id="option-contrast" class="selects">
+                        <div class="option">
+                            <label class="container">Высокий
+                                <input type="checkbox">
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                        <div class="option">
+                            <label class="container">Низкий
+                                <input type="checkbox">
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                        <div class="option">
+                            <label class="container">Нейтральный
+                                <input type="checkbox">
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <span class="label">Плотность</span>
+                    <div id="option-density" class="selects">
+                        <div class="option">
+                            <label class="container">Низкая
+                                <input type="checkbox">
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                        <div class="option">
+                            <label class="container">Высокая
+                                <input type="checkbox">
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                        <div class="option">
+                            <label class="container">Нейтральная
+                                <input type="checkbox">
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <span class="label">Рамка</span>
+                    <div id="option-frame" class="selects">
+                        <div class="option">
+                            <label class="container">Да
+                                <input type="checkbox">
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                        <div class="option">
+                            <label class="container">Нет
+                                <input type="checkbox">
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="horizontal-line"></div>
+                    <span class="label">Упаковка</span>
+                    <div id="option-package" class="selects">
+                        <div class="option">
+                            <label class="container">Калька
+                                <input type="checkbox">
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                        <div class="option">
+                            <label class="container">Рулонный сливер
+                                <input type="checkbox">
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <span class="label">Экспресс</span>
+                    <div id="option-express" class="selects">
+                        <div class="option wide">
+                            <label class="container">+100% к стоимости заказа
+                                <input type="checkbox">
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <div class="virtual-table">
+                    <div class="virtual-table-heading">
+                        <div class="virtual-table-head">тип пленки<br>35/120/220</div>
+                        <div class="virtual-table-head">тип проявки<br>C41/BW/E6</div>
+                        <div class="virtual-table-head">количество</div>
+                        <div class="virtual-table-head">размер скана<br>L/XL/TIFF</div>
+                        <div class="virtual-table-head">push</div>
+                    </div>
+                    <div class="virtual-table-body">
+                        <div class="virtual-row">
+                            <div class="virtual-cell">&nbsp;</div>
+                            <div class="virtual-cell">&nbsp;</div>
+                            <div class="virtual-cell">&nbsp;</div>
+                            <div class="virtual-cell">&nbsp;</div>
+                            <div class="virtual-cell">&nbsp;</div>
+                        </div>
+                        <div class="virtual-row">
+                            <div class="virtual-cell">&nbsp;</div>
+                            <div class="virtual-cell">&nbsp;</div>
+                            <div class="virtual-cell">&nbsp;</div>
+                            <div class="virtual-cell">&nbsp;</div>
+                            <div class="virtual-cell">&nbsp;</div>
+                        </div>
+                        <div class="virtual-row">
+                            <div class="virtual-cell">&nbsp;</div>
+                            <div class="virtual-cell">&nbsp;</div>
+                            <div class="virtual-cell">&nbsp;</div>
+                            <div class="virtual-cell">&nbsp;</div>
+                            <div class="virtual-cell">&nbsp;</div>
+                        </div>
+                        <div class="virtual-row">
+                            <div class="virtual-cell">&nbsp;</div>
+                            <div class="virtual-cell">&nbsp;</div>
+                            <div class="virtual-cell">&nbsp;</div>
+                            <div class="virtual-cell">&nbsp;</div>
+                            <div class="virtual-cell">&nbsp;</div>
+                        </div>
+                        <div class="virtual-row">
+                            <div class="virtual-cell">&nbsp;</div>
+                            <div class="virtual-cell">&nbsp;</div>
+                            <div class="virtual-cell">&nbsp;</div>
+                            <div class="virtual-cell">&nbsp;</div>
+                            <div class="virtual-cell">&nbsp;</div>
+                        </div>
+                        <div class="virtual-row">
+                            <div class="virtual-cell">&nbsp;</div>
+                            <div class="virtual-cell">&nbsp;</div>
+                            <div class="virtual-cell">&nbsp;</div>
+                            <div class="virtual-cell">&nbsp;</div>
+                            <div class="virtual-cell">&nbsp;</div>
+                        </div>
+                        <div class="virtual-row">
+                            <div class="virtual-cell">&nbsp;</div>
+                            <div class="virtual-cell">&nbsp;</div>
+                            <div class="virtual-cell">&nbsp;</div>
+                            <div class="virtual-cell">&nbsp;</div>
+                            <div class="virtual-cell">&nbsp;</div>
+                        </div>
+                    </div>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td class="vertically-top">
+                <div class="preferences">
+                    <div class="label">Если у вас есть пожелания по сканированию, напишите об этом здесь</div>
+                    <textarea class="preferences-input"></textarea>
+                </div>
+            </td>
+            <td>
+                <div class="empty">
+                    <div id="empty-left"></div>
+                    <div id="empty-middle"></div>
+                    <div id="empty-right"></div>
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>
+</body>
+</html>
