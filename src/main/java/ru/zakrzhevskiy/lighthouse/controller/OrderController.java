@@ -2,6 +2,7 @@ package ru.zakrzhevskiy.lighthouse.controller;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import ru.zakrzhevskiy.lighthouse.model.Order;
 import ru.zakrzhevskiy.lighthouse.repository.OrderRepository;
+import ru.zakrzhevskiy.lighthouse.service.OrderFormService;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -19,6 +21,8 @@ import java.util.Optional;
 @RequestMapping("/orders")
 public class OrderController {
 
+    @Autowired
+    private OrderFormService orderFormService;
     private final Logger log = LoggerFactory.getLogger(OrderController.class);
     private final OrderRepository orderRepository;
 
@@ -43,5 +47,10 @@ public class OrderController {
         Optional<Order> order = orderRepository.findById(id);
         return order.map(response -> ResponseEntity.ok().body(response))
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
+    @RequestMapping(path = "/order/{id}/generateReport", method = RequestMethod.GET)
+    public Object generateOrderForm(@PathVariable Long id) {
+        return orderFormService.generateOrderForm(id);
     }
 }
