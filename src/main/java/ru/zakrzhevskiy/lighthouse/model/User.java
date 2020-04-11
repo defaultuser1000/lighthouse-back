@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.zakrzhevskiy.lighthouse.model.audit.AuditModel;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -21,7 +22,7 @@ import java.util.Set;
 @Entity
 @JsonView
 @Table(name = "USERS")
-public class User {
+public class User extends AuditModel {
 
     @Id
     @GeneratedValue

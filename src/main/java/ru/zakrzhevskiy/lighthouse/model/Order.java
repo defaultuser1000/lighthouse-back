@@ -5,10 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.zakrzhevskiy.lighthouse.model.enums.OrderStatus;
+import ru.zakrzhevskiy.lighthouse.model.audit.AuditModel;
+import ru.zakrzhevskiy.lighthouse.model.enums.*;
 
 import javax.persistence.*;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -18,7 +18,7 @@ import java.util.Set;
 @Builder
 @Entity
 @Table(name = "ORDERS")
-public class Order {
+public class Order extends AuditModel {
 
     @Id
     @GeneratedValue
@@ -37,8 +37,12 @@ public class Order {
     private Long orderCreator;
 
     private String scanner;
-    private String scanType;
-    private String scanSize;
+
+    @Enumerated(EnumType.STRING)
+    private ScanType scanType;
+
+    @Enumerated(EnumType.STRING)
+    private ScanSize scanSize;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "order_id")
@@ -46,15 +50,19 @@ public class Order {
 
     private String special;
 
-    private String colorTones;
-    private String contrast;
-    private String density;
-    private Boolean frame;
-    private String pack;
-    private String express;
+    @Enumerated(EnumType.STRING)
+    private ColorTones colorTones;
 
-    private Date creationDate;
-    private Date modificationDate;
+    @Enumerated(EnumType.STRING)
+    private Contrast contrast;
+
+    @Enumerated(EnumType.STRING)
+    private Density density;
+    private Boolean frame;
+
+    @Enumerated(EnumType.STRING)
+    private Pack pack;
+    private Boolean express;
 
     @Lob
     private String orderForm;

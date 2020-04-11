@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.zakrzhevskiy.lighthouse.model.audit.AuditModel;
 
 import javax.persistence.*;
 
@@ -15,7 +16,7 @@ import javax.persistence.*;
 @Builder
 @Entity
 @Table(name = "FILMS")
-public class Film {
+public class Film extends AuditModel {
 
     @Id
     @GeneratedValue

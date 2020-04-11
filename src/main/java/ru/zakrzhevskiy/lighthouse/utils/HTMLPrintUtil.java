@@ -77,12 +77,12 @@ public class HTMLPrintUtil {
                 .attr("value", instagramAccounts.toString());
 
         reportTemplate.select("#" + data.getScanner().toLowerCase()).attr("checked", "checked");
-        reportTemplate.select("#" + data.getScanType().toLowerCase()).attr("checked", "checked");
-        reportTemplate.select("#" + data.getScanSize().toLowerCase()).attr("checked", "checked");
+        reportTemplate.select("#" + data.getScanType().name().toLowerCase()).attr("checked", "checked");
+        reportTemplate.select("#" + data.getScanSize().name().toLowerCase()).attr("checked", "checked");
 
-        reportTemplate.select("#" + data.getColorTones().toLowerCase() + "-tone").attr("checked", "checked");
-        reportTemplate.select("#" + data.getContrast().toLowerCase() + "-contrast").attr("checked", "checked");
-        reportTemplate.select("#" + data.getDensity().toLowerCase() + "-density").attr("checked", "checked");
+        reportTemplate.select("#" + data.getColorTones().name().toLowerCase() + "-tone").attr("checked", "checked");
+        reportTemplate.select("#" + data.getContrast().name().toLowerCase() + "-contrast").attr("checked", "checked");
+        reportTemplate.select("#" + data.getDensity().name().toLowerCase() + "-density").attr("checked", "checked");
 
         reportTemplate.select("#preferences-area").html(data.getSpecial());
 
