@@ -6,6 +6,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import ru.zakrzhevskiy.lighthouse.model.Order;
+import ru.zakrzhevskiy.lighthouse.model.User;
 
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
@@ -28,9 +29,9 @@ public class HTMLPrintUtil {
     private static final String ROW_TEMPLATE_CLASS = "row-template";
 
 
-    public static byte[] printPdfReport(String reportTemplate, Order data) {
+    public static String printPdfReport(String reportTemplate, Order data, User orderOwner) {
 
-        Document report = fillReportTemplate(reportTemplate, data);
+        Document report = fillReportTemplate(reportTemplate, data, orderOwner);
         org.w3c.dom.Document w3cDoc = DOMBuilder.jsoup2DOM(report);
 
         TransformerFactory transformerFactory = TransformerFactory.newInstance();
@@ -49,22 +50,45 @@ public class HTMLPrintUtil {
 
 
 //        return buildPdfReportFromDocument(w3cDoc);
-        return bos.toByteArray();
+        return bos.toString();
     }
 
-    private static Document fillReportTemplate(String reportName, Order data) {
+    private static Document fillReportTemplate(String reportName, Order data, User orderOwner) {
         Map<String, String> contrastMap = new HashMap<String, String>() {
             {
                 put("Высокий", "high-contrast");
             }
         };
         Document reportTemplate = getReportTemplate(reportName);
+        reportTemplate.select("#fio").attr("value", orderOwner.getFIO());
+        reportTemplate.select("#" + (contrastMap.containsKey(data.getContrast())
+                ? contrastMap.get(data.getContrast())
+                : data.getContrast() + "-contrast").toLowerCase()
+        ).attr("checked", "checked");
+        reportTemplate.select("#phone").attr("value", orderOwner.getPhoneNumber());
+        reportTemplate.select("#mail").attr("value", orderOwner.getEMail());
 
-        reportTemplate.select("#fio").attr("value", data.getOrderOwner().getFirstName() + " " + data.getOrderOwner().getLastName());
-        reportTemplate.select("#" + contrastMap.get(data.getContrast())).attr("checked", "checked");
+        StringBuilder instagramAccounts = new StringBuilder();
+
+        orderOwner.getInstagram().forEach(instagram ->
+            instagramAccounts.append(instagram).append("; ")
+        );
+        reportTemplate.select("#insta")
+                .attr("value", instagramAccounts.toString());
+
+        reportTemplate.select("#" + data.getScanner().toLowerCase()).attr("checked", "checked");
+        reportTemplate.select("#" + data.getScanType().toLowerCase()).attr("checked", "checked");
+        reportTemplate.select("#" + data.getScanSize().toLowerCase()).attr("checked", "checked");
+
+        reportTemplate.select("#" + data.getColorTones().toLowerCase() + "-tone").attr("checked", "checked");
+        reportTemplate.select("#" + data.getContrast().toLowerCase() + "-contrast").attr("checked", "checked");
+        reportTemplate.select("#" + data.getDensity().toLowerCase() + "-density").attr("checked", "checked");
+
         reportTemplate.select("#preferences-area").html(data.getSpecial());
+
         String qrCodeScript = reportTemplate.select("#container-for-qr").select("script").html().replace("#ORDER_ID#", data.getId().toString());
         reportTemplate.select("#container-for-qr").select("script").html(qrCodeScript);
+
 //        reportTemplate.select("").html();
 //        reportTemplate.select("").html();
 
