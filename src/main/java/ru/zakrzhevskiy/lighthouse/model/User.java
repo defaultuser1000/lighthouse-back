@@ -1,7 +1,5 @@
 package ru.zakrzhevskiy.lighthouse.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.AllArgsConstructor;
@@ -29,6 +27,11 @@ public class User extends AuditModel {
     @JsonProperty("userId")
     @Column(updatable = false, insertable = false)
     private Long id;
+
+    @Column(nullable = false, unique = true)
+    private String username;
+    @Column(nullable = false)
+    private String password;
 
     @Column(nullable = false)
     private String firstName;
