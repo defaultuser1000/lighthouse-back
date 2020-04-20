@@ -2,10 +2,7 @@ package ru.zakrzhevskiy.lighthouse.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import ru.zakrzhevskiy.lighthouse.model.audit.AuditModel;
 
 import javax.persistence.*;
@@ -14,11 +11,12 @@ import java.util.List;
 import java.util.Set;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Entity
-@JsonView
+//@JsonView
 @Table(name = "USERS")
 public class User extends AuditModel {
 
@@ -32,6 +30,18 @@ public class User extends AuditModel {
     private String username;
     @Column(nullable = false)
     private String password;
+    @Column(nullable = false, columnDefinition = "boolean default true")
+    private Boolean enabled;
+
+    @Lob
+    private byte[] avatar;
+
+    @ManyToMany
+    @JoinTable(
+            name = "users_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id"))
+    private Set<Role> roles;
 
     @Column(nullable = false)
     private String firstName;

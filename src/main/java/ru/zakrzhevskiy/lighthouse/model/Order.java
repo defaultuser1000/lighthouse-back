@@ -1,10 +1,7 @@
 package ru.zakrzhevskiy.lighthouse.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import ru.zakrzhevskiy.lighthouse.model.audit.AuditModel;
 import ru.zakrzhevskiy.lighthouse.model.enums.*;
 
@@ -13,6 +10,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -46,7 +44,7 @@ public class Order extends AuditModel {
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "order_id")
-    private Set<Film> orderFilms = new HashSet<>();
+    private final Set<Film> orderFilms = new HashSet<>();
 
     private String special;
 
