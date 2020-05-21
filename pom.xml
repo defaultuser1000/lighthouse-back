@@ -115,6 +115,13 @@
             <version>${openhtml.version}</version>
         </dependency>
         <!-- HTML to PDF end -->
+
+        <!-- Yandex.Disk API-->
+        <dependency>
+            <groupId>com.yandex.android</groupId>
+            <artifactId>disk-restapi-sdk</artifactId>
+            <version>1.03</version>
+        </dependency>
     </dependencies>
 
     <build>

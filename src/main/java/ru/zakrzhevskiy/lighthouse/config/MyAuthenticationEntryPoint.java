@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @Component
-public class AuthenticationEntryPoint extends BasicAuthenticationEntryPoint {
+public class MyAuthenticationEntryPoint extends BasicAuthenticationEntryPoint {
 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException)
@@ -19,7 +19,7 @@ public class AuthenticationEntryPoint extends BasicAuthenticationEntryPoint {
 
     @Override
     public void afterPropertiesSet() {
-        setRealmName("DeveloperStack");
+        setRealmName("LighthouseFilmLab");
         super.afterPropertiesSet();
     }
 

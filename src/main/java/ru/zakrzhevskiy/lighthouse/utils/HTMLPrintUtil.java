@@ -60,17 +60,17 @@ public class HTMLPrintUtil {
             }
         };
         Document reportTemplate = getReportTemplate(reportName);
-        reportTemplate.select("#fio").attr("value", orderOwner.getFIO());
+        reportTemplate.select("#fio").attr("value", orderOwner.getMyUserDetails().getFIO());
         reportTemplate.select("#" + (contrastMap.containsKey(data.getContrast())
                 ? contrastMap.get(data.getContrast())
                 : data.getContrast() + "-contrast").toLowerCase()
         ).attr("checked", "checked");
-        reportTemplate.select("#phone").attr("value", orderOwner.getPhoneNumber());
+        reportTemplate.select("#phone").attr("value", orderOwner.getMyUserDetails().getPhoneNumber());
         reportTemplate.select("#mail").attr("value", orderOwner.getEMail());
 
         StringBuilder instagramAccounts = new StringBuilder();
 
-        orderOwner.getInstagram().forEach(instagram ->
+        orderOwner.getMyUserDetails().getInstagram().forEach(instagram ->
             instagramAccounts.append(instagram).append("; ")
         );
         reportTemplate.select("#insta")

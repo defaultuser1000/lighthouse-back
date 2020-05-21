@@ -2,12 +2,10 @@ package ru.zakrzhevskiy.lighthouse.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.web.AuthenticationEntryPoint;
 
 import javax.sql.DataSource;
 
@@ -18,7 +16,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private DataSource dataSource;
     @Autowired
-    private AuthenticationEntryPoint authEntryPoint;
+    private MyAuthenticationEntryPoint authEntryPoint;
 
     @Autowired
     public void configAuthentication(AuthenticationManagerBuilder auth) throws Exception {
@@ -36,13 +34,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable()
                 .authorizeRequests()
-                .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .antMatchers("/users/sign-up").permitAll()
+                .antMatchers("/users/sign-up").anonymous()
+                .antMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().fullyAuthenticated()
                 .and().httpBasic()
                 .authenticationEntryPoint(authEntryPoint);
+
         http.logout(logout -> logout.logoutUrl("/users/logout")
-                .invalidateHttpSession(true));
+                .invalidateHttpSession(true)
+                .deleteCookies("SESSION"));
 
     }
 

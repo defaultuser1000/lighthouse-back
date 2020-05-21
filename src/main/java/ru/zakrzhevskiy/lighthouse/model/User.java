@@ -1,13 +1,10 @@
 package ru.zakrzhevskiy.lighthouse.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonView;
 import lombok.*;
 import ru.zakrzhevskiy.lighthouse.model.audit.AuditModel;
 
 import javax.persistence.*;
-import java.util.Date;
-import java.util.List;
 import java.util.Set;
 
 @Data
@@ -16,7 +13,6 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 @Entity
-//@JsonView
 @Table(name = "USERS")
 public class User extends AuditModel {
 
@@ -28,13 +24,19 @@ public class User extends AuditModel {
 
     @Column(nullable = false, unique = true)
     private String username;
+
+    @Column(unique = true, nullable = false)
+    private String eMail;
+
     @Column(nullable = false)
     private String password;
+
     @Column(nullable = false, columnDefinition = "boolean default true")
     private Boolean enabled;
 
-    @Lob
-    private byte[] avatar;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "details_id", referencedColumnName = "id")
+    private MyUserDetails myUserDetails;
 
     @ManyToMany
     @JoinTable(
@@ -43,45 +45,10 @@ public class User extends AuditModel {
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles;
 
-    @Column(nullable = false)
-    private String firstName;
-
-    private String secondName;
-
-    @Column(nullable = false)
-    private String lastName;
-
-    @Column(columnDefinition = "DATE")
-    @Temporal(TemporalType.DATE)
-    private Date birthDay;
-
-    @Column(nullable = false)
-    private String country;
-
-    @Column(nullable = false)
-    private String city;
-
-    @Column(nullable = false)
-    private String address;
-
-    @Column(nullable = false)
-    private String phoneNumber;
-
-    @Column(unique = true, nullable = false)
-    private String eMail;
-
-    @Column(unique = true)
-    @ElementCollection
-    private List<String> instagram;
-
     @OneToMany(mappedBy="orderOwner")
     private Set<Order> ownedOrders;
 
     @OneToMany(mappedBy="orderCreator")
     private Set<Order> createdOrders;
 
-    public String getFIO() {
-        String fio = this.firstName + " " + this.lastName;
-        return secondName == null ? fio : fio.replaceAll("\\s", " " + this.secondName + " ");
-    }
 }

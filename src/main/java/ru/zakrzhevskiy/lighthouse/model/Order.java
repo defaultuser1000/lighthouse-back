@@ -64,4 +64,6 @@ public class Order extends AuditModel {
 
     @Lob
     private String orderForm;
+
+    private String orderDiskDestination;
 }
