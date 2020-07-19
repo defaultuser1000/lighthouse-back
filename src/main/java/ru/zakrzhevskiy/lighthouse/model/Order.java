@@ -3,7 +3,14 @@ package ru.zakrzhevskiy.lighthouse.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import ru.zakrzhevskiy.lighthouse.model.audit.AuditModel;
-import ru.zakrzhevskiy.lighthouse.model.enums.*;
+import ru.zakrzhevskiy.lighthouse.model.enums.ColorTones;
+import ru.zakrzhevskiy.lighthouse.model.enums.Contrast;
+import ru.zakrzhevskiy.lighthouse.model.enums.Density;
+import ru.zakrzhevskiy.lighthouse.model.enums.Pack;
+import ru.zakrzhevskiy.lighthouse.model.price.OrderType;
+import ru.zakrzhevskiy.lighthouse.model.price.ScanSize;
+import ru.zakrzhevskiy.lighthouse.model.price.Scanner;
+
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -25,7 +32,8 @@ public class Order extends AuditModel {
     private Long id;
     private Integer orderNumber;
 
-    @Enumerated(EnumType.STRING)
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinColumn(name="order_status_id", nullable=false)
     private OrderStatus orderStatus;
 
     @Column(name="user_owner_id", nullable=false)
@@ -34,13 +42,21 @@ public class Order extends AuditModel {
     @Column(name="user_creator_id", nullable=false)
     private Long orderCreator;
 
-    private String scanner;
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinColumn(name="scanner_id")
+    private Scanner scanner;
 
-    @Enumerated(EnumType.STRING)
-    private ScanType scanType;
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinColumn(name="order_type_id", nullable=false)
+    private OrderType orderType;
 
-    @Enumerated(EnumType.STRING)
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinColumn(name="scan_size_id")
     private ScanSize scanSize;
+
+//    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+//    @JoinColumn(name = "order_id")
+//    private Set<Message> messages;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "order_id")

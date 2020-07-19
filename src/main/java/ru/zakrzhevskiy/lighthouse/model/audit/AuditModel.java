@@ -1,9 +1,11 @@
 package ru.zakrzhevskiy.lighthouse.model.audit;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import ru.zakrzhevskiy.lighthouse.model.reference_gallery.View;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -20,11 +22,13 @@ public abstract class AuditModel implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(nullable = false, updatable = false)
     @CreatedDate
+    @JsonView({View.Short.class, View.Full.class})
     private Date creationDate;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(nullable = false)
     @LastModifiedDate
+    @JsonView({View.Short.class, View.Full.class})
     private Date modificationDate;
 
     public Date getCreationDate() {

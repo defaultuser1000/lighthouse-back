@@ -36,7 +36,8 @@ public class User extends AuditModel {
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "details_id", referencedColumnName = "id")
-    private MyUserDetails myUserDetails;
+    @Builder.Default
+    private MyUserDetails myUserDetails = new MyUserDetails();
 
     @ManyToMany
     @JoinTable(

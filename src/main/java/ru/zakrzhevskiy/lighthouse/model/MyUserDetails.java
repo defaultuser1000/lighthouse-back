@@ -2,6 +2,7 @@ package ru.zakrzhevskiy.lighthouse.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
+import ru.zakrzhevskiy.lighthouse.model.reference_gallery.ReferencePhoto;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -52,6 +53,10 @@ public class MyUserDetails {
     @Column(unique = true)
     @ElementCollection
     private List<String> instagram;
+
+//    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+//    @JoinColumn(name = "user_id")
+//    private List<ReferencePhoto> referencePhotos;
 
     public String getFIO() {
         String fio = this.firstName + " " + this.lastName;

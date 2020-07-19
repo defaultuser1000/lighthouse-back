@@ -76,9 +76,9 @@ public class HTMLPrintUtil {
         reportTemplate.select("#insta")
                 .attr("value", instagramAccounts.toString());
 
-        reportTemplate.select("#" + data.getScanner().toLowerCase()).attr("checked", "checked");
-        reportTemplate.select("#" + data.getScanType().name().toLowerCase()).attr("checked", "checked");
-        reportTemplate.select("#" + data.getScanSize().name().toLowerCase()).attr("checked", "checked");
+        reportTemplate.select("#" + data.getScanner().getName().toLowerCase()).attr("checked", "checked");
+        reportTemplate.select("#" + data.getOrderType().getName().toLowerCase()).attr("checked", "checked");
+        reportTemplate.select("#" + data.getScanSize().getSize().toLowerCase()).attr("checked", "checked");
 
         reportTemplate.select("#" + data.getColorTones().name().toLowerCase() + "-tone").attr("checked", "checked");
         reportTemplate.select("#" + data.getContrast().name().toLowerCase() + "-contrast").attr("checked", "checked");

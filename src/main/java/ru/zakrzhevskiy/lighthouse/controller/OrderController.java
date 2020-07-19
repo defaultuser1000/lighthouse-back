@@ -3,24 +3,28 @@ package ru.zakrzhevskiy.lighthouse.controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-import ru.zakrzhevskiy.lighthouse.model.Film;
-import ru.zakrzhevskiy.lighthouse.model.Order;
-import ru.zakrzhevskiy.lighthouse.model.User;
-import ru.zakrzhevskiy.lighthouse.model.enums.OrderStatus;
-import ru.zakrzhevskiy.lighthouse.repository.OrderRepository;
-import ru.zakrzhevskiy.lighthouse.repository.UserRepository;
+import ru.zakrzhevskiy.lighthouse.model.*;
+import ru.zakrzhevskiy.lighthouse.model.price.OrderType;
+import ru.zakrzhevskiy.lighthouse.model.price.ScanSize;
+import ru.zakrzhevskiy.lighthouse.model.price.Scanner;
+import ru.zakrzhevskiy.lighthouse.repository.*;
 import ru.zakrzhevskiy.lighthouse.service.OrderFormService;
 
 import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.Principal;
-import java.util.Optional;
+import java.util.*;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 @RestController
 @RequestMapping("/orders")
@@ -32,7 +36,17 @@ public class OrderController {
     @Autowired
     private OrderRepository orderRepository;
     @Autowired
+    private MessagesRepository messagesRepository;
+    @Autowired
+    private OrderStatusRepository orderStatusRepository;
+    @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private ScanSizeRepository scanSizeRepository;
+    @Autowired
+    private OrderTypeRepository orderTypeRepository;
+    @Autowired
+    private ScannerRepository scannerRepository;
 
     // Yandex.Disk base folder path
     private final String BASE_FOLDER = "";
@@ -41,12 +55,92 @@ public class OrderController {
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public Iterable<Order> orders(Principal principal) {
+    @Transactional
+    public ResponseEntity<?> orders(
+            Principal principal,
+            @RequestParam(required = false, defaultValue = "0") Integer page,
+            @RequestParam(required = false, defaultValue = "20") Integer pageSize,
+            @RequestParam(required = false, defaultValue = "DESC") Sort.Direction direction,
+            @RequestParam(required = false, defaultValue = "modificationDate") String sortBy
+    ) {
 
         String username = principal.getName();
         User user = userRepository.findUserByUsername(username).get();
 
-        return orderRepository.findByOrderOwnerOrderByModificationDate(user.getId());
+        Page<Order> orders = orderRepository.findByOrderOwner(user.getId(), PageRequest.of(page, pageSize, Sort.by(direction, sortBy)));
+
+        return ResponseEntity.ok().body(orders);
+    }
+
+    @RequestMapping(
+            path = "/order/{id}/messages",
+            method = RequestMethod.GET,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<?> getOrderMessages(@PathVariable Long id,
+                                              @RequestParam(required = false, defaultValue = "0") Integer page,
+                                              @RequestParam(required = false, defaultValue = "30") Integer pageSize,
+                                              @RequestParam(required = false, defaultValue = "ASC") Sort.Direction direction,
+                                              @RequestParam(required = false, defaultValue = "creationDate") String sortBy
+    ) {
+        Optional<Page<Message>> result = messagesRepository.findByOrderId(id, PageRequest.of(page, pageSize, Sort.by(direction, sortBy)));
+
+        return result.map(response -> ResponseEntity.ok().body(response))
+                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
+    @RequestMapping(
+            path = "/order/{id}/messages",
+            method = RequestMethod.POST,
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<?> createMessage(@PathVariable Long id, @Valid @RequestBody Message message, Principal principal) throws URISyntaxException {
+        User creator = userRepository.findUserByUsername(principal.getName()).get();
+        Order order = orderRepository.findOrderById(id);
+
+        message.setText(Base64.getEncoder().encodeToString(message.getText().getBytes(UTF_8)));
+
+        message.setUserId(creator.getId());
+        message.setOrderId(order.getId());
+
+        Message result = messagesRepository.save(message);
+
+        return ResponseEntity.created(new URI("/orders/order/" + order.getId() + "/messages/" + result.getId())).body(result);
+    }
+
+    @RequestMapping(
+            path = "/order/messages/{messageId}",
+            method = RequestMethod.DELETE
+    )
+    public ResponseEntity<?> deleteMessage(@PathVariable Long messageId) {
+        Message message = messagesRepository.getOne(messageId);
+
+        messagesRepository.delete(message);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @RequestMapping(
+            path = "/statistics",
+            method = RequestMethod.GET,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    @Transactional
+    public ResponseEntity<?> getOrdersStatistics(Principal principal) {
+        String username = principal.getName();
+        User user = userRepository.findUserByUsername(username).get();
+
+        List<Order> orders = orderRepository.findByOrderOwner(user.getId());
+
+        Map<String, Integer> ordersStatistics = new LinkedHashMap<>();
+        ordersStatistics.put("All", orders.size());
+        orders.forEach(order -> {
+            Integer value = ordersStatistics.containsKey(order.getOrderStatus().getDisplayName()) ? ordersStatistics.get(order.getOrderStatus().getDisplayName()) + 1 : 1;
+            ordersStatistics.put(order.getOrderStatus().getDisplayName(), value);
+        });
+
+        return ResponseEntity.ok(ordersStatistics);
     }
 
     @RequestMapping(
@@ -60,6 +154,7 @@ public class OrderController {
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
+    @Transactional
     @RequestMapping(
             method = RequestMethod.POST,
             consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -81,7 +176,17 @@ public class OrderController {
         order.setOrderNumber(orderNumber);
         order.setOrderCreator(creatorAndOwner.getId());
         order.setOrderOwner(creatorAndOwner.getId());
-        order.setOrderStatus(OrderStatus.NEW);
+
+        OrderStatus newOrderStatus = orderStatusRepository.findOrderStatusByDisplayName("New");
+        order.setOrderStatus(newOrderStatus);
+
+        ScanSize scanSize = scanSizeRepository.findBySize(order.getScanSize().getSize());
+        OrderType orderType = orderTypeRepository.findByName(order.getOrderType().getName());
+        Scanner scanner = scannerRepository.findByName(order.getScanner().getName());
+
+        order.setScanSize(scanSize);
+        order.setOrderType(orderType);
+        order.setScanner(scanner);
 
         Order result = orderRepository.save(order);
 
@@ -102,6 +207,25 @@ public class OrderController {
         log.info("Request to update order: {}", baseOrder);
         Order result = orderRepository.save(order);
         return ResponseEntity.ok().body(result);
+    }
+
+    @RequestMapping(
+            method = RequestMethod.POST,
+            path = "/order/{id}/nextStatus",
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<?> nextStatus(@PathVariable Long id) {
+        Order order = orderRepository.findOrderById(id);
+        OrderStatus currentStatus = order.getOrderStatus();
+
+        OrderStatus nextStatus = orderStatusRepository.getOne(currentStatus.getNextStatusId());
+
+        order.setOrderStatus(nextStatus);
+
+        orderRepository.save(order);
+
+        return ResponseEntity.ok().build();
+
     }
 
     @RequestMapping(

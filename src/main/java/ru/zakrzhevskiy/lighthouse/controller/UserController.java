@@ -1,25 +1,38 @@
 package ru.zakrzhevskiy.lighthouse.controller;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.zakrzhevskiy.lighthouse.model.*;
+import ru.zakrzhevskiy.lighthouse.model.reference_gallery.ReferencePhoto;
+import ru.zakrzhevskiy.lighthouse.model.reference_gallery.View;
 import ru.zakrzhevskiy.lighthouse.repository.OrderRepository;
-import ru.zakrzhevskiy.lighthouse.repository.RoleRepository;
+import ru.zakrzhevskiy.lighthouse.repository.ReferencePhotosRepository;
 import ru.zakrzhevskiy.lighthouse.repository.UserRepository;
+import ru.zakrzhevskiy.lighthouse.service.OnRegistrationCompleteEvent;
+import ru.zakrzhevskiy.lighthouse.service.UserService;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.io.IOException;
 import java.security.Principal;
-import java.util.HashSet;
+import java.util.Locale;
 import java.util.Optional;
-import java.util.Set;
 
 import static org.springframework.http.HttpStatus.*;
 
@@ -28,32 +41,35 @@ import static org.springframework.http.HttpStatus.*;
 public class UserController {
 
     private final Logger log = LoggerFactory.getLogger(UserController.class);
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
     @Autowired
     private UserRepository userRepository;
     @Autowired
-    private RoleRepository roleRepository;
-    @Autowired
-    private BCryptPasswordEncoder bCryptPasswordEncoder;
+    private UserService userService;
     @Autowired
     private OrderRepository orderRepository;
+    @Autowired
+    private ReferencePhotosRepository referencePhotosRepository;
 
     @RequestMapping(
             method = RequestMethod.POST,
             path = "/sign-up",
             consumes = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<?> signUp(@Valid @RequestBody User user) {
+    public ResponseEntity<?> signUp(@Valid @RequestBody User user, HttpServletRequest request) {
 
         if (usernameExist(user.getUsername())) {
             return ResponseEntity.status(CONFLICT).body("Username");
         } else if (emailExist(user.getEMail())) {
             return ResponseEntity.status(CONFLICT).body("E-Mail");
         } else {
-            user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-            Set<Role> roles = new HashSet<>();
-            roles.add(roleRepository.findByName("USER"));
-            user.setRoles(roles);
-            userRepository.save(user);
+            User result = userService.registerNewUserAccount(user);
+            eventPublisher.publishEvent(
+                    new OnRegistrationCompleteEvent(result, request.getLocale(), request.getContextPath())
+            );
+
             return ResponseEntity.status(CREATED).build();
         }
 
@@ -63,6 +79,20 @@ public class UserController {
     }
     private boolean emailExist(String email) {
         return userRepository.findUserByeMail(email).isPresent();
+    }
+
+    @SneakyThrows
+    @RequestMapping(method = RequestMethod.GET, path = "/registrationConfirm")
+    public void registrationConfirm(@RequestParam("token") final String token, HttpServletResponse resp) {
+
+        final String result = userService.validateVerificationToken(token);
+
+        if (result.equals("valid")) {
+            resp.sendRedirect("/activationSuccess");
+        } else {
+            resp.setStatus(500);
+            resp.sendRedirect("/errorActivating?error=" + result);
+        }
     }
 
     @RequestMapping(
@@ -82,12 +112,22 @@ public class UserController {
                             user.get().getId(),
                             user.get().getUsername(),
                             !details.getFIO().contains("null") ? details.getFIO() : "",
-                            details.getAvatar() != null ? details.getAvatar() : new byte[] {}
+                            details.getAvatar() != null ? details.getAvatar() : new byte[] {},
+                            user.get().getRoles()
                             )
             );
         } else {
             return ResponseEntity.status(UNAUTHORIZED).build();
         }
+    }
+
+    @RequestMapping(
+            method = RequestMethod.GET,
+            path = "/check-auth",
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<?> checkAuth() {
+        return ResponseEntity.ok().build();
     }
 
     @SneakyThrows
@@ -98,7 +138,16 @@ public class UserController {
     )
     public ResponseEntity<?> uploadUserAvatar(@RequestParam MultipartFile avatar, @PathVariable Long id) {
         User user = userRepository.findUserById(id);
-        user.getMyUserDetails().setAvatar(avatar.getBytes());
+
+        if (user.getMyUserDetails() == null) {
+            MyUserDetails details = new MyUserDetails();
+            details.setAvatar(avatar.getBytes());
+
+            user.setMyUserDetails(details);
+        } else {
+            user.getMyUserDetails().setAvatar(avatar.getBytes());
+        }
+
         userRepository.save(user);
         return ResponseEntity.ok().build();
     }
@@ -114,5 +163,62 @@ public class UserController {
         log.info("Request to update user: {}", baseUser);
         User result = userRepository.save(user);
         return ResponseEntity.ok().body(result);
+    }
+
+    @RequestMapping(
+            path = "/user/{id}/referencePhotos",
+            method = RequestMethod.PUT,
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    @JsonView(View.Short.class)
+    public ResponseEntity<?> addReferencePhoto(@PathVariable Long id, @RequestParam("file") MultipartFile multipartFile, @RequestParam("thumbnail") MultipartFile thumbnail, @RequestParam("description") String description) throws IOException {
+        log.info("Request to add user {} reference photo", id);
+
+        ReferencePhoto referencePhoto = new ReferencePhoto();
+        referencePhoto.setPhoto(multipartFile.getBytes());
+        referencePhoto.setThumbnail(thumbnail.getBytes());
+        referencePhoto.setDescription(description);
+        referencePhoto.setUserId(id);
+
+        ReferencePhoto result = referencePhotosRepository.save(referencePhoto);
+
+        return ResponseEntity.status(CREATED).body(result);
+    }
+
+    @SneakyThrows
+    @RequestMapping(
+            path = "/user/{id}/referencePhotos",
+            method = RequestMethod.GET,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    @Transactional
+    @JsonView(View.Short.class)
+    public ResponseEntity<?> getUserReferencePhotos(
+            @PathVariable(name = "id") Long id,
+            @RequestParam(required = false, defaultValue = "0") Integer page,
+            @RequestParam(required = false, defaultValue = "20") Integer pageSize,
+            @RequestParam(required = false, defaultValue = "DESC") Sort.Direction direction,
+            @RequestParam(required = false, defaultValue = "creationDate") String sortBy
+    ) {
+        Page<ReferencePhoto> referencePhotoPage = referencePhotosRepository.findByUserId(id, PageRequest.of(page, pageSize, Sort.by(direction, sortBy)));
+
+        return ResponseEntity.ok(referencePhotoPage);
+    }
+
+    @SneakyThrows
+    @RequestMapping(
+            path = "/user/referencePhotos/{photoId}",
+            method = RequestMethod.GET,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    @Transactional
+    @JsonView(View.Full.class)
+    public ResponseEntity<?> getUserReferencePhoto(@PathVariable(name = "photoId") Long photoId) {
+
+        Optional<ReferencePhoto> referencePhoto = referencePhotosRepository.findById(photoId);
+
+        return referencePhoto.map(response -> ResponseEntity.ok().body(response))
+                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 }

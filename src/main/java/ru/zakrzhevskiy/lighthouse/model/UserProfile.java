@@ -3,6 +3,8 @@ package ru.zakrzhevskiy.lighthouse.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
+import java.util.Set;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -14,5 +16,6 @@ public class UserProfile {
     private String username;
     private String fio;
     private byte[] avatar;
+    private Set<Role> roles;
 
 }
