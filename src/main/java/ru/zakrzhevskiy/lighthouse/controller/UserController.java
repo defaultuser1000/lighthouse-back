@@ -1,6 +1,7 @@
 package ru.zakrzhevskiy.lighthouse.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import javassist.NotFoundException;
 import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -220,5 +221,42 @@ public class UserController {
 
         return referencePhoto.map(response -> ResponseEntity.ok().body(response))
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
+    @RequestMapping(
+            method = RequestMethod.PATCH,
+            path = "/user/referencePhotos/{id}",
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<?> editReferencePhotoDescription(@PathVariable Long id, @RequestParam(name = "description") String description) {
+        Optional<ReferencePhoto> referencePhoto = referencePhotosRepository.findById(id);
+
+        return referencePhoto.map(photo -> {
+            photo.setDescription(description);
+            referencePhotosRepository.save(photo);
+            return ResponseEntity.ok().body(photo);
+        }).orElse(new ResponseEntity<>(NOT_FOUND));
+    }
+
+    @RequestMapping(
+            method = RequestMethod.DELETE,
+            path = "/user/referencePhotos/{id}"
+    )
+    @Transactional
+    public ResponseEntity<?> deleteReferencePhoto(@PathVariable Long id) {
+        log.info("Request to delete referencePhoto: {}", referencePhotosRepository.findById(id));
+        referencePhotosRepository.deleteById(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @RequestMapping(method = RequestMethod.POST, path = "/user/acceptTnC")
+    @Transactional
+    public ResponseEntity<?> acceptTermsOfConditions(Principal principal) {
+        User user = userRepository.findUserByUsername(principal.getName()).orElseThrow(RuntimeException::new);
+
+        user.setTermsOfConditionsAccepted(true);
+        userRepository.save(user);
+
+        return ResponseEntity.ok().build();
     }
 }

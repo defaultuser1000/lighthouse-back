@@ -52,4 +52,7 @@ public class User extends AuditModel {
     @OneToMany(mappedBy="orderCreator")
     private Set<Order> createdOrders;
 
+    @Builder.Default
+    private Boolean termsOfConditionsAccepted = false;
+
 }

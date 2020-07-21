@@ -95,6 +95,7 @@ public class OrderController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
+    @Transactional
     public ResponseEntity<?> createMessage(@PathVariable Long id, @Valid @RequestBody Message message, Principal principal) throws URISyntaxException {
         User creator = userRepository.findUserByUsername(principal.getName()).get();
         Order order = orderRepository.findOrderById(id);
