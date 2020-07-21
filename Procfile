@@ -1,0 +1,1 @@
+web:  java -Dserver.port=$PORT $JAVA_OPTS -jar target/lighthouse-0.0.1-SNAPSHOT.jar -Drun.jvmArguments="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005"
