@@ -2,7 +2,7 @@
 --changeset zakrzhevskiy-as:20200723-08
 insert into order_statuses (id, display_name, next_status_id, creation_date, modification_date)
 values (
-           default,
+           1,
            'Ready',
            NULL,
            current_timestamp,
@@ -10,7 +10,7 @@ values (
        );
 insert into order_statuses (id, display_name, next_status_id, creation_date, modification_date)
 values (
-           default,
+           2,
            'Uploaded',
            (select id from order_statuses where display_name = 'Ready'),
            current_timestamp,
@@ -18,7 +18,7 @@ values (
        );
 insert into order_statuses (id, display_name, next_status_id, creation_date, modification_date)
 values (
-           default,
+           3,
            'Processed',
            (select id from order_statuses where display_name = 'Uploaded'),
            current_timestamp,
@@ -26,7 +26,7 @@ values (
        );
 insert into order_statuses (id, display_name, next_status_id, creation_date, modification_date)
 values (
-           default,
+           4,
            'Scanned',
            (select id from order_statuses where display_name = 'Processed'),
            current_timestamp,
@@ -34,7 +34,7 @@ values (
        );
 insert into order_statuses (id, display_name, next_status_id, creation_date, modification_date)
 values (
-           default,
+           5,
            'Developed',
            (select id from order_statuses where display_name = 'Scanned'),
            current_timestamp,
@@ -42,7 +42,7 @@ values (
        );
 insert into order_statuses (id, display_name, next_status_id, creation_date, modification_date)
 values (
-           default,
+           6,
            'Arrived',
            (select id from order_statuses where display_name = 'Developed'),
            current_timestamp,
@@ -50,7 +50,7 @@ values (
        );
 insert into order_statuses (id, display_name, next_status_id, creation_date, modification_date)
 values (
-           default,
+           7,
            'Approved',
            (select id from order_statuses where display_name = 'Arrived'),
            current_timestamp,
@@ -58,7 +58,7 @@ values (
        );
 insert into order_statuses (id, display_name, next_status_id, creation_date, modification_date)
 values (
-           default,
+           8,
            'New',
            (select id from order_statuses where display_name = 'Approved'),
            current_timestamp,
