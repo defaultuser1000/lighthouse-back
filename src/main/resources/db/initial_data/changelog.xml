@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<databaseChangeLog xmlns="https://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="https://www.liquibase.org/xml/ns/dbchangelog
+    https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+    <include file="initial_data/currencies/create.sql"
+             relativeToChangelogFile="true" />
+    <include file="initial_data/film_formats/create.sql"
+             relativeToChangelogFile="true" />
+    <include file="initial_data/order_types/create.sql"
+             relativeToChangelogFile="true" />
+    <include file="initial_data/processes/create.sql"
+             relativeToChangelogFile="true" />
+    <include file="initial_data/roles/create.sql"
+             relativeToChangelogFile="true" />
+    <include file="initial_data/scan_sizes/create.sql"
+             relativeToChangelogFile="true" />
+    <include file="initial_data/scanners/create.sql"
+             relativeToChangelogFile="true" />
+    <include file="initial_data/statuses/create.sql"
+             relativeToChangelogFile="true" />
+</databaseChangeLog>
