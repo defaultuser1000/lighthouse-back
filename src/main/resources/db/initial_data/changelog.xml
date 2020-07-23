@@ -1,22 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<databaseChangeLog xmlns="https://www.liquibase.org/xml/ns/dbchangelog"
-                   xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
-                   xsi:schemaLocation="https://www.liquibase.org/xml/ns/dbchangelog
-    https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
-    <include file="currencies/create.sql"
-             relativeToChangelogFile="true" />
-    <include file="film_formats/create.sql"
-             relativeToChangelogFile="true" />
-    <include file="order_types/create.sql"
-             relativeToChangelogFile="true" />
-    <include file="processes/create.sql"
-             relativeToChangelogFile="true" />
-    <include file="roles/create.sql"
-             relativeToChangelogFile="true" />
-    <include file="scan_sizes/create.sql"
-             relativeToChangelogFile="true" />
-    <include file="scanners/create.sql"
-             relativeToChangelogFile="true" />
-    <include file="statuses/create.sql"
-             relativeToChangelogFile="true" />
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation = "http://www.liquibase.org/xml/ns/dbchangelog/1.9
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+    <include file="currencies/create.sql" relativeToChangelogFile="true" />
+    <include file="film_formats/create.sql" relativeToChangelogFile="true" />
+    <include file="order_types/create.sql" relativeToChangelogFile="true" />
+    <include file="processes/create.sql" relativeToChangelogFile="true" />
+    <include file="roles/create.sql" relativeToChangelogFile="true" />
+    <include file="scan_sizes/create.sql" relativeToChangelogFile="true" />
+    <include file="scanners/create.sql" relativeToChangelogFile="true" />
+    <include file="statuses/create.sql" relativeToChangelogFile="true" />
 </databaseChangeLog>
