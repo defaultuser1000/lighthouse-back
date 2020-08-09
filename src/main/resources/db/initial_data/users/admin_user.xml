@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+    <changeSet id="20200809-01" author="zakrzhevskiy-as">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">select count(1) from users where username = 'admin';</sqlCheck>
+        </preConditions>
+        <comment>Create admin user</comment>
+        <sql>INSERT INTO users(id, creation_date, modification_date, e_mail, enabled, password, username, details_id,
+            terms_of_conditions_accepted)
+            values ((select max(id) + 1 from users),
+            current_timestamp,
+            current_timestamp,
+            'admin@lighthousefilmlab.com',
+            true,
+            crypt('P@$$w0rd', gen_salt('bf')),
+            'admin',
+            null,
+            true);</sql>
+    </changeSet>
+    <changeSet id="20200809-02" author="zakrzhevskiy-as">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">select count(1) from users u join users_roles ur on u.id = ur.user_id where u.username = 'admin';</sqlCheck>
+        </preConditions>
+        <comment>Add roles to created user</comment>
+        <sql>insert into users_roles(user_id, role_id)
+            values ((select id from users where username = 'admin'), (select id from roles where name = 'ADMIN'));
+            insert into users_roles(user_id, role_id)
+            values ((select id from users where username = 'admin'), (select id from roles where name = 'USER'));</sql>
+    </changeSet>
+</databaseChangeLog>

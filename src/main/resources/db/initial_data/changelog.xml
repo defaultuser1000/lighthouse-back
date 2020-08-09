@@ -11,4 +11,5 @@
     <include file="scan_sizes/create.sql" relativeToChangelogFile="true" />
     <include file="scanners/create.sql" relativeToChangelogFile="true" />
     <include file="statuses/create.sql" relativeToChangelogFile="true" />
+    <include file="users/admin_user.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

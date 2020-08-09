@@ -17,7 +17,6 @@ import java.util.Set;
 @Builder
 @Entity
 @Table(name = "USERS")
-//@DynamicUpdate
 public class User extends AuditModel {
 
     @Id
@@ -26,9 +25,6 @@ public class User extends AuditModel {
     @Column(updatable = false, insertable = false)
     @JsonView({View.Short.class, View.Full.class})
     private Long id;
-
-//    @Version
-//    private int version;
 
     @Column(nullable = false, unique = true)
     @JsonView({View.Short.class, View.Full.class})
