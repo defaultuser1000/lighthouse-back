@@ -1,14 +1,13 @@
 package ru.zakrzhevskiy.lighthouse.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import javassist.NotFoundException;
 import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -17,13 +16,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.zakrzhevskiy.lighthouse.model.*;
-import ru.zakrzhevskiy.lighthouse.model.reference_gallery.ReferencePhoto;
-import ru.zakrzhevskiy.lighthouse.model.reference_gallery.View;
+import ru.zakrzhevskiy.lighthouse.model.ReferencePhoto;
+import ru.zakrzhevskiy.lighthouse.model.views.View;
 import ru.zakrzhevskiy.lighthouse.repository.OrderRepository;
 import ru.zakrzhevskiy.lighthouse.repository.ReferencePhotosRepository;
 import ru.zakrzhevskiy.lighthouse.repository.UserRepository;
+import ru.zakrzhevskiy.lighthouse.repository.VerificationTokenRepository;
 import ru.zakrzhevskiy.lighthouse.service.OnRegistrationCompleteEvent;
 import ru.zakrzhevskiy.lighthouse.service.UserService;
 
@@ -32,7 +31,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.io.IOException;
 import java.security.Principal;
-import java.util.Locale;
 import java.util.Optional;
 
 import static org.springframework.http.HttpStatus.*;
@@ -50,6 +48,8 @@ public class UserController {
     @Autowired
     private UserService userService;
     @Autowired
+    private VerificationTokenRepository tokenRepository;
+    @Autowired
     private OrderRepository orderRepository;
     @Autowired
     private ReferencePhotosRepository referencePhotosRepository;
@@ -59,6 +59,7 @@ public class UserController {
             path = "/sign-up",
             consumes = MediaType.APPLICATION_JSON_VALUE
     )
+    @Transactional
     public ResponseEntity<?> signUp(@Valid @RequestBody User user, HttpServletRequest request) {
 
         if (usernameExist(user.getUsername())) {
@@ -70,8 +71,9 @@ public class UserController {
             eventPublisher.publishEvent(
                     new OnRegistrationCompleteEvent(result, request.getLocale(), request.getContextPath())
             );
+            VerificationToken token = tokenRepository.findByUser(result);
 
-            return ResponseEntity.status(CREATED).build();
+            return ResponseEntity.status(CREATED).body(token.getToken());
         }
 
     }
@@ -96,30 +98,32 @@ public class UserController {
         }
     }
 
+    @SneakyThrows
+    @RequestMapping(
+            method = RequestMethod.PUT,
+            path = "/setUserDetails",
+            consumes = MediaType.APPLICATION_JSON_VALUE
+    )
+    public void updateUserDetails(@RequestParam(name = "token") String token, @Valid @RequestBody MyUserDetails userDetails, HttpServletResponse resp) {
+
+        final String result = userService.fulfillUserDetails(token, userDetails);
+
+        if (!result.equals("userDetailsUpdated")) {
+            resp.sendError(500, "Failed to set user details");
+        }
+    }
+
     @RequestMapping(
             path = "/authenticate",
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     @Transactional
+    @JsonView(View.Short.class)
     public ResponseEntity<?> authenticate(Principal principal) {
         Optional<User> user = userRepository.findUserByUsername(principal.getName());
 
-        if (user.isPresent()) {
-            MyUserDetails details = user.get().getMyUserDetails() == null ? new MyUserDetails() : user.get().getMyUserDetails();
-
-            return ResponseEntity.ok(
-                    new UserProfile(
-                            user.get().getId(),
-                            user.get().getUsername(),
-                            !details.getFIO().contains("null") ? details.getFIO() : "",
-                            details.getAvatar() != null ? details.getAvatar() : new byte[] {},
-                            user.get().getRoles()
-                            )
-            );
-        } else {
-            return ResponseEntity.status(UNAUTHORIZED).build();
-        }
+        return user.map(ResponseEntity::ok).orElse(ResponseEntity.status(UNAUTHORIZED).build());
     }
 
     @RequestMapping(
@@ -129,6 +133,19 @@ public class UserController {
     )
     public ResponseEntity<?> checkAuth() {
         return ResponseEntity.ok().build();
+    }
+
+    @SneakyThrows
+    @Transactional
+    @RequestMapping(
+            method = RequestMethod.GET,
+            path = "/getUserProfile",
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<?> getProfile(Principal principal) {
+        return userRepository.findUserByUsername(principal.getName())
+                .map(response -> ResponseEntity.ok().body(response))
+                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
     @SneakyThrows
@@ -159,10 +176,13 @@ public class UserController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
+    @Transactional
     public ResponseEntity<?> updateUser(@PathVariable Long id, @Valid @RequestBody User user) {
         User baseUser = userRepository.findUserById(id);
         log.info("Request to update user: {}", baseUser);
+        user.setPassword(baseUser.getPassword());
         User result = userRepository.save(user);
+
         return ResponseEntity.ok().body(result);
     }
 

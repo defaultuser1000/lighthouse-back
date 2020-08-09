@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.zakrzhevskiy.lighthouse.config.UserAlreadyExistException;
+import ru.zakrzhevskiy.lighthouse.model.MyUserDetails;
 import ru.zakrzhevskiy.lighthouse.model.Role;
 import ru.zakrzhevskiy.lighthouse.model.User;
 import ru.zakrzhevskiy.lighthouse.model.VerificationToken;
@@ -23,6 +24,7 @@ public class UserService implements IUserService {
     public static final String TOKEN_INVALID = "invalidToken";
     public static final String TOKEN_EXPIRED = "expired";
     public static final String TOKEN_VALID = "valid";
+    public static final String USER_DETAILS_UPDATED = "userDetailsUpdated";
 
     @Autowired
     private UserRepository repository;
@@ -61,13 +63,12 @@ public class UserService implements IUserService {
 
     @Override
     public User getUser(String verificationToken) {
-        User user = tokenRepository.findByToken(verificationToken).getUser();
-        return user;
+        return tokenRepository.findByToken(verificationToken).getUser();
     }
 
     @Override
-    public VerificationToken getVerificationToken(String VerificationToken) {
-        return tokenRepository.findByToken(VerificationToken);
+    public VerificationToken getVerificationToken(String verificationToken) {
+        return tokenRepository.findByToken(verificationToken);
     }
 
     @Override
@@ -101,5 +102,25 @@ public class UserService implements IUserService {
         // tokenRepository.delete(verificationToken);
         repository.save(user);
         return TOKEN_VALID;
+    }
+
+    @Override
+    public String fulfillUserDetails(String token, MyUserDetails userDetails) {
+        final VerificationToken verificationToken = tokenRepository.findByToken(token);
+        if (verificationToken == null) {
+            return TOKEN_INVALID;
+        }
+
+        final User user = verificationToken.getUser();
+        final Calendar cal = Calendar.getInstance();
+        if ((verificationToken.getExpiryDate()
+                .getTime() - cal.getTime()
+                .getTime()) <= 0) {
+            return TOKEN_EXPIRED;
+        }
+
+        user.setMyUserDetails(userDetails);
+        repository.save(user);
+        return USER_DETAILS_UPDATED;
     }
 }

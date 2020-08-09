@@ -1,5 +1,7 @@
 --liquibase formatted sql
 --changeset zakrzhevskiy-as:20200723-08
+--preconditions onFail:MARK_RAN onError:MARK_RAN
+--precondition-sql-check expectedResult:0 SELECT COUNT(*) FROM order_statuses WHERE display_name in ('Ready', 'Uploaded', 'Processed', 'Scanned', 'Developed', 'Arrived', 'Approved', 'New')
 insert into order_statuses (id, display_name, next_status_id, creation_date, modification_date)
 values (
            1,

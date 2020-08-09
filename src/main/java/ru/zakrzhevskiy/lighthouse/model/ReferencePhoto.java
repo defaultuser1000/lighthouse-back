@@ -1,9 +1,10 @@
-package ru.zakrzhevskiy.lighthouse.model.reference_gallery;
+package ru.zakrzhevskiy.lighthouse.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.*;
 import ru.zakrzhevskiy.lighthouse.model.audit.AuditModel;
+import ru.zakrzhevskiy.lighthouse.model.views.View;
 
 import javax.persistence.*;
 

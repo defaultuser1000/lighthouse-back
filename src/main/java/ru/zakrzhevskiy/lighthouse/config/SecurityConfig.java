@@ -44,6 +44,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(
                         "/users/sign-up",
                         "/users/registrationConfirm",
+                        "/users/setUserDetails",
                         "/activationSuccess",
                         "/errorActivating"
                 ).anonymous()

@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import ru.zakrzhevskiy.lighthouse.model.reference_gallery.View;
+import ru.zakrzhevskiy.lighthouse.model.views.View;
 
 import javax.persistence.*;
 import java.io.Serializable;

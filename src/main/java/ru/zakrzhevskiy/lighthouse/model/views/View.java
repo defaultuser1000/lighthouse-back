@@ -1,4 +1,4 @@
-package ru.zakrzhevskiy.lighthouse.model.reference_gallery;
+package ru.zakrzhevskiy.lighthouse.model.views;
 
 public class View {
     public interface Full {}
