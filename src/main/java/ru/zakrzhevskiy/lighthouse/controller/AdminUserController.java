@@ -36,6 +36,7 @@ public class AdminUserController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
+    @JsonView({View.OrderUser.class})
     public ResponseEntity<User> createUser(@Valid @RequestBody User user) throws URISyntaxException {
         log.info("Request to create user: {}", user);
 
@@ -48,6 +49,7 @@ public class AdminUserController {
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
+    @JsonView({View.OrderUser.class})
     public ResponseEntity<?> users(
             @RequestParam(required = false, defaultValue = "0") Integer page,
             @RequestParam(required = false, defaultValue = "20") Integer pageSize,
@@ -83,6 +85,7 @@ public class AdminUserController {
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
+    @JsonView({View.OrderUser.class})
     public ResponseEntity<?> getUser(@PathVariable Long id) {
         Optional<User> user = userRepository.findById(id);
         return user.map(response -> ResponseEntity.ok().body(response))
@@ -95,6 +98,7 @@ public class AdminUserController {
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     @Transactional
+    @JsonView({View.OrderUser.class})
     public Iterable<Order> getUserOwnedOrders(@PathVariable Long id) {
         return userRepository.findUserById(id).getOwnedOrders();
     }
@@ -104,6 +108,8 @@ public class AdminUserController {
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
+    @Transactional
+    @JsonView({View.OrderUser.class})
     public Iterable<Order> getUserCreatedOrders(@PathVariable Long id) {
         return userRepository.findUserById(id).getCreatedOrders();
     }
