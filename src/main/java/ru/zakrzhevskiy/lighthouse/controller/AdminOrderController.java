@@ -47,7 +47,7 @@ public class AdminOrderController {
 
         User creatorAndOwner = userRepository.findUserByUsername(principal.getName()).get();
 
-        order.setOrderCreator(creatorAndOwner.getId());
+        order.setOrderCreator(creatorAndOwner);
 
         Order result = orderRepository.save(order);
 
@@ -74,7 +74,7 @@ public class AdminOrderController {
     )
     public ResponseEntity<?> getOrderOwner(@PathVariable Long id) {
         Order order = orderRepository.findOrderById(id);
-        Optional<User> orderOwner = userRepository.findById(order.getOrderOwner());
+        Optional<User> orderOwner = userRepository.findById(order.getOrderOwner().getId());
         return orderOwner.map(response -> ResponseEntity.ok().body(response))
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
@@ -86,7 +86,7 @@ public class AdminOrderController {
     )
     public ResponseEntity<?> getOrderCreator(@PathVariable Long id) {
         Order order = orderRepository.findOrderById(id);
-        Optional<User> orderCreator = userRepository.findById(order.getOrderCreator());
+        Optional<User> orderCreator = userRepository.findById(order.getOrderCreator().getId());
         return orderCreator.map(response -> ResponseEntity.ok().body(response))
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }

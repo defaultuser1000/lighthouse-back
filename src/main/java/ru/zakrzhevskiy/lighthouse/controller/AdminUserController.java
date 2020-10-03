@@ -1,8 +1,12 @@
 package ru.zakrzhevskiy.lighthouse.controller;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -10,11 +14,13 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import ru.zakrzhevskiy.lighthouse.model.Order;
 import ru.zakrzhevskiy.lighthouse.model.User;
+import ru.zakrzhevskiy.lighthouse.model.views.View;
 import ru.zakrzhevskiy.lighthouse.repository.UserRepository;
 
 import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -42,8 +48,24 @@ public class AdminUserController {
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public Iterable<User> users() {
-        return userRepository.findAll();
+    public ResponseEntity<?> users(
+            @RequestParam(required = false, defaultValue = "0") Integer page,
+            @RequestParam(required = false, defaultValue = "20") Integer pageSize,
+            @RequestParam(required = false, defaultValue = "DESC") Sort.Direction direction,
+            @RequestParam(required = false, defaultValue = "modificationDate") String sortBy
+    ) {
+        Page<User> usersPage = userRepository.findAll(PageRequest.of(page, pageSize, Sort.by(direction, sortBy)));
+        return ResponseEntity.ok().body(usersPage);
+    }
+
+    @RequestMapping(
+            path = "/search",
+            method = RequestMethod.GET,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    @JsonView({View.Short.class})
+    public ResponseEntity<?> getUsersByIds(@RequestParam List<Long> ids) {
+        return ResponseEntity.ok(userRepository.findAllById(ids));
     }
 
     @RequestMapping(

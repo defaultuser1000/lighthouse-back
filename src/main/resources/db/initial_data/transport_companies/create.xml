@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+    <changeSet id="20200817-01" author="zakrzhevskiy-as">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">select count(1) from transport_companies where code in ('cdek', 'rus_post');</sqlCheck>
+        </preConditions>
+        <comment>Create default transport companies</comment>
+        <sqlFile path="transport_companies.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+    <changeSet id="20200817-02" author="zakrzhevskiy-as">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">select count(1) from transport_company_names where name in ('СДЭК', 'Почта России', 'Russian post');</sqlCheck>
+        </preConditions>
+        <comment>Add localized names depending on country availability</comment>
+        <sqlFile path="transport_companies_names.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+</databaseChangeLog>

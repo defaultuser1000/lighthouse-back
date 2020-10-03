@@ -82,6 +82,12 @@
         </dependency>
 
         <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-all</artifactId>
+            <version>3.0.5</version>
+        </dependency>
+
+        <dependency>
             <groupId>com.itextpdf</groupId>
             <artifactId>itextpdf</artifactId>
             <version>5.4.3</version>
@@ -102,6 +108,13 @@
             <artifactId>commons-io</artifactId>
             <version>2.5</version>
         </dependency>
+
+        <!-- Library for scheduled jobs tests (in future) -->
+<!--        <dependency>-->
+<!--            <groupId>org.awaitility</groupId>-->
+<!--            <artifactId>awaitility</artifactId>-->
+<!--        </dependency>-->
+
 
         <!-- HTML to PDF -->
         <dependency>
@@ -126,16 +139,37 @@
         </dependency>
         <!-- HTML to PDF end -->
 
+        <!-- NEW TRYS HTML to PDF -->
+        <dependency>
+            <groupId>org.thymeleaf</groupId>
+            <artifactId>thymeleaf</artifactId>
+            <version>3.0.11.RELEASE</version>
+        </dependency>
+        <dependency>
+            <groupId>org.xhtmlrenderer</groupId>
+            <artifactId>flying-saucer-pdf</artifactId>
+            <version>9.1.20</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/com.github.jhonnymertz/java-wkhtmltopdf-wrapper -->
+        <dependency>
+            <groupId>com.github.jhonnymertz</groupId>
+            <artifactId>java-wkhtmltopdf-wrapper</artifactId>
+            <version>1.1.12-RELEASE</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.apache.tika/tika-core -->
+        <dependency>
+            <groupId>org.apache.tika</groupId>
+            <artifactId>tika-core</artifactId>
+            <version>1.24.1</version>
+        </dependency>
+
         <!-- Yandex.Disk API-->
         <dependency>
             <groupId>com.yandex.android</groupId>
             <artifactId>disk-restapi-sdk</artifactId>
             <version>1.03</version>
-        </dependency>
-        <dependency>
-            <groupId>org.thymeleaf</groupId>
-            <artifactId>thymeleaf</artifactId>
-            <version>3.0.11.RELEASE</version>
         </dependency>
         <dependency>
             <groupId>org.thymeleaf</groupId>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+    <changeSet id="20200816-02" author="zakrzhevskiy-as">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="transport_companies"/>
+            </not>
+        </preConditions>
+        <createTable tableName="transport_companies">
+            <column type="bigint" name="id">
+                <constraints primaryKey="true"/>
+            </column>
+            <column type="varchar(32)" name="code">
+                <constraints uniqueConstraintName="transport_companies_code" unique="true"/>
+            </column>
+        </createTable>
+        <comment>Create table transport_companies</comment>
+    </changeSet>
+    <changeSet id="20200816-03" author="zakrzhevskiy-as">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="transport_company_names"/>
+            </not>
+        </preConditions>
+        <createTable tableName="transport_company_names">
+            <column type="bigint" name="id">
+                <constraints primaryKey="true"/>
+            </column>
+            <column type="varchar(255)" name="name">
+                <constraints uniqueConstraintName="transport_company_names_name" unique="true"/>
+            </column>
+            <column type="varchar(20)" name="locale"/>
+            <column type="bigint" name="company_id">
+                <constraints foreignKeyName="fk_transport_company_names_transport_companies" references="transport_companies(id)" nullable="false"/>
+            </column>
+        </createTable>
+        <comment>Create table transport_company_names, referencing to transport_companies</comment>
+    </changeSet>
+    <changeSet id="20200816-04" author="zakrzhevskiy-as">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="orders" columnName="transport_company_id"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="orders">
+            <column name="transport_company_id" type="bigint">
+                <constraints foreignKeyName="fk_orders_transport_companies" references="transport_companies(id)" nullable="true"/>
+            </column>
+        </addColumn>
+        <comment>Add referencing column to transport companies table</comment>
+    </changeSet>
+    <changeSet id="20200816-05" author="zakrzhevskiy-as">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="orders" columnName="after_order_processed"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="orders">
+            <column name="after_order_processed" type="varchar(255)"/>
+        </addColumn>
+        <comment>Add column after_order_processed</comment>
+    </changeSet>
+</databaseChangeLog>

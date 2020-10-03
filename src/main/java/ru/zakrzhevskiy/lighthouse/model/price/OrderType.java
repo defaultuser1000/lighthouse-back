@@ -1,8 +1,10 @@
 package ru.zakrzhevskiy.lighthouse.model.price;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
 import lombok.*;
 import ru.zakrzhevskiy.lighthouse.model.audit.AuditModel;
+import ru.zakrzhevskiy.lighthouse.model.views.View;
 
 import javax.persistence.*;
 
@@ -22,6 +24,7 @@ public class OrderType extends AuditModel {
     private Long id;
 
     @Column(unique = true)
+    @JsonView(View.OrderUser.class)
     private String name;
 
 }

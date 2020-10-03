@@ -1,16 +1,14 @@
 package ru.zakrzhevskiy.lighthouse.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
 import lombok.*;
 import ru.zakrzhevskiy.lighthouse.model.audit.AuditModel;
-import ru.zakrzhevskiy.lighthouse.model.enums.ColorTones;
-import ru.zakrzhevskiy.lighthouse.model.enums.Contrast;
-import ru.zakrzhevskiy.lighthouse.model.enums.Density;
-import ru.zakrzhevskiy.lighthouse.model.enums.Pack;
+import ru.zakrzhevskiy.lighthouse.model.enums.*;
 import ru.zakrzhevskiy.lighthouse.model.price.OrderType;
 import ru.zakrzhevskiy.lighthouse.model.price.ScanSize;
 import ru.zakrzhevskiy.lighthouse.model.price.Scanner;
-
+import ru.zakrzhevskiy.lighthouse.model.views.View;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -23,6 +21,7 @@ import java.util.Set;
 @Builder
 @Entity
 @Table(name = "ORDERS")
+@JsonView(View.OrderUser.class)
 public class Order extends AuditModel {
 
     @Id
@@ -36,11 +35,13 @@ public class Order extends AuditModel {
     @JoinColumn(name="order_status_id", nullable=false)
     private OrderStatus orderStatus;
 
-    @Column(name="user_owner_id", nullable=false)
-    private Long orderOwner;
+    @ManyToOne
+    @JoinColumn(name="user_owner_id", nullable=false)
+    private User orderOwner;
 
-    @Column(name="user_creator_id", nullable=false)
-    private Long orderCreator;
+    @ManyToOne
+    @JoinColumn(name="user_creator_id", nullable=false)
+    private User orderCreator;
 
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name="scanner_id")
@@ -53,10 +54,6 @@ public class Order extends AuditModel {
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name="scan_size_id")
     private ScanSize scanSize;
-
-//    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-//    @JoinColumn(name = "order_id")
-//    private Set<Message> messages;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "order_id")
@@ -78,8 +75,12 @@ public class Order extends AuditModel {
     private Pack pack;
     private Boolean express;
 
-    @Lob
-    private String orderForm;
+    @Enumerated(EnumType.STRING)
+    private AfterOrderProcessed afterOrderProcessed;
+
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinColumn(name="transport_company_id")
+    private TransportCompany transportCompany;
 
     private String orderDiskDestination;
 }

@@ -5,4 +5,8 @@
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
     <include file="initial_data/changelog.xml" relativeToChangelogFile="true"/>
     <include file="users_details_table/add_postal_code_column.xml" relativeToChangelogFile="true"/>
+    <include file="orders_table/remove_order_form_column.xml" relativeToChangelogFile="true"/>
+    <include file="orders_table/add_after_order_process_options.xml" relativeToChangelogFile="true"/>
+    <include file="scanners_table/add_name_unique_constraint.xml" relativeToChangelogFile="true"/>
+    <include file="order_types/add_name_unique_constraint.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

@@ -1,30 +1,43 @@
 package ru.zakrzhevskiy.lighthouse.controller;
 
+import com.fasterxml.jackson.annotation.JsonView;
+import lombok.SneakyThrows;
+import org.apache.tika.io.IOUtils;
+import org.omg.CosNaming.NamingContextPackage.NotFound;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import ru.zakrzhevskiy.lighthouse.model.*;
 import ru.zakrzhevskiy.lighthouse.model.price.OrderType;
 import ru.zakrzhevskiy.lighthouse.model.price.ScanSize;
 import ru.zakrzhevskiy.lighthouse.model.price.Scanner;
+import ru.zakrzhevskiy.lighthouse.model.views.View;
 import ru.zakrzhevskiy.lighthouse.repository.*;
 import ru.zakrzhevskiy.lighthouse.service.OrderFormService;
 
 import javax.validation.Valid;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.Principal;
 import java.util.*;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.stream.Collectors.toList;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @RestController
 @RequestMapping("/orders")
@@ -51,10 +64,12 @@ public class OrderController {
     // Yandex.Disk base folder path
     private final String BASE_FOLDER = "";
 
+    @SneakyThrows
     @RequestMapping(
             method = RequestMethod.GET,
-            produces = MediaType.APPLICATION_JSON_VALUE
+            produces = APPLICATION_JSON_VALUE
     )
+    @JsonView(View.OrderUser.class)
     @Transactional
     public ResponseEntity<?> orders(
             Principal principal,
@@ -65,9 +80,14 @@ public class OrderController {
     ) {
 
         String username = principal.getName();
-        User user = userRepository.findUserByUsername(username).get();
+        User user = userRepository.findUserByUsername(username).orElseThrow(NotFound::new);
 
-        Page<Order> orders = orderRepository.findByOrderOwner(user.getId(), PageRequest.of(page, pageSize, Sort.by(direction, sortBy)));
+        Page<Order> orders;
+        if (user.getRoles().stream().anyMatch(role -> role.getName().equals("ADMIN"))) {
+            orders = orderRepository.findAll(PageRequest.of(page, pageSize, Sort.by(direction, sortBy)));
+        } else {
+            orders = orderRepository.findByOrderOwner(user.getId(), PageRequest.of(page, pageSize, Sort.by(direction, sortBy)));
+        }
 
         return ResponseEntity.ok().body(orders);
     }
@@ -75,7 +95,7 @@ public class OrderController {
     @RequestMapping(
             path = "/order/{id}/messages",
             method = RequestMethod.GET,
-            produces = MediaType.APPLICATION_JSON_VALUE
+            produces = APPLICATION_JSON_VALUE
     )
     public ResponseEntity<?> getOrderMessages(@PathVariable Long id,
                                               @RequestParam(required = false, defaultValue = "0") Integer page,
@@ -92,8 +112,8 @@ public class OrderController {
     @RequestMapping(
             path = "/order/{id}/messages",
             method = RequestMethod.POST,
-            consumes = MediaType.APPLICATION_JSON_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE
+            consumes = APPLICATION_JSON_VALUE,
+            produces = APPLICATION_JSON_VALUE
     )
     @Transactional
     public ResponseEntity<?> createMessage(@PathVariable Long id, @Valid @RequestBody Message message, Principal principal) throws URISyntaxException {
@@ -125,7 +145,7 @@ public class OrderController {
     @RequestMapping(
             path = "/statistics",
             method = RequestMethod.GET,
-            produces = MediaType.APPLICATION_JSON_VALUE
+            produces = APPLICATION_JSON_VALUE
     )
     @Transactional
     public ResponseEntity<?> getOrdersStatistics(Principal principal) {
@@ -147,7 +167,7 @@ public class OrderController {
     @RequestMapping(
             path = "/order/{id}",
             method = RequestMethod.GET,
-            produces = MediaType.APPLICATION_JSON_VALUE
+            produces = APPLICATION_JSON_VALUE
     )
     public ResponseEntity<?> getOrder(@PathVariable Long id) {
         Optional<Order> order = orderRepository.findById(id);
@@ -158,8 +178,8 @@ public class OrderController {
     @Transactional
     @RequestMapping(
             method = RequestMethod.POST,
-            consumes = MediaType.APPLICATION_JSON_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE
+            consumes = APPLICATION_JSON_VALUE,
+            produces = APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Order> createOrder(@Valid @RequestBody Order order, Principal principal) throws URISyntaxException {
         log.info("Request to create order: {}", order);
@@ -175,8 +195,8 @@ public class OrderController {
         User creatorAndOwner = userRepository.findUserByUsername(principal.getName()).get();
 
         order.setOrderNumber(orderNumber);
-        order.setOrderCreator(creatorAndOwner.getId());
-        order.setOrderOwner(creatorAndOwner.getId());
+        order.setOrderCreator(creatorAndOwner);
+        order.setOrderOwner(creatorAndOwner);
 
         OrderStatus newOrderStatus = orderStatusRepository.findOrderStatusByDisplayName("New");
         order.setOrderStatus(newOrderStatus);
@@ -191,17 +211,14 @@ public class OrderController {
 
         Order result = orderRepository.save(order);
 
-//        result.setOrderForm(orderFormService.generateOrderForm(result));
-//        orderRepository.save(result);
-
         return ResponseEntity.created(new URI("/orders/order/" + result.getId())).body(result);
     }
 
     @RequestMapping(
             method = RequestMethod.PUT,
             path = "/order/{id}",
-            consumes = MediaType.APPLICATION_JSON_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE
+            consumes = APPLICATION_JSON_VALUE,
+            produces = APPLICATION_JSON_VALUE
     )
     public ResponseEntity<?> updateOrder(@PathVariable Long id, @Valid @RequestBody Order order) {
         Order baseOrder = orderRepository.findOrderById(id);
@@ -213,7 +230,7 @@ public class OrderController {
     @RequestMapping(
             method = RequestMethod.POST,
             path = "/order/{id}/nextStatus",
-            produces = MediaType.APPLICATION_JSON_VALUE
+            produces = APPLICATION_JSON_VALUE
     )
     public ResponseEntity<?> nextStatus(@PathVariable Long id) {
         Order order = orderRepository.findOrderById(id);
@@ -232,15 +249,35 @@ public class OrderController {
     @RequestMapping(
             method = RequestMethod.GET,
             path = "/order/{id}/films",
-            produces = MediaType.APPLICATION_JSON_VALUE
+            produces = APPLICATION_JSON_VALUE
     )
     public Iterable<Film> getOrderFilms(@PathVariable Long id) {
         return orderRepository.findOrderById(id).getOrderFilms();
     }
 
-    @RequestMapping(path = "/order/{id}/generateReport", method = RequestMethod.GET)
-    public Object generateOrderForm(@PathVariable Long id) {
-        return orderFormService.generateOrderForm(id);
+    @SneakyThrows
+    @Transactional
+    @RequestMapping(
+            path = "/order/{id}/generateReport",
+            method = RequestMethod.GET
+    )
+    public ResponseEntity<Resource> generateOrderForm(@PathVariable Long id, Principal principal) {
+        User user = userRepository.findUserByUsername(principal.getName()).orElseThrow(NotFound::new);
+        Order order = orderRepository.findOrderById(id);
+
+        if (!order.getOrderOwner().equals(user.getId())) {
+            throw new AccessDeniedException("You not allowed to process that order...");
+        }
+
+        File outputFile = orderFormService.generatePdf(order, user).toFile().getAbsoluteFile();
+
+        byte[] content = IOUtils.toByteArray(new FileInputStream(outputFile));
+
+        return ResponseEntity.ok()
+                .header("Content-Disposition", "attachment; filename=" + outputFile.getName())
+                .contentType(MediaType.APPLICATION_PDF)
+                .contentLength(content.length)
+                .body(new InputStreamResource(new ByteArrayInputStream(content)));
     }
 
     @RequestMapping(path = "/order/{id}/setOrderDiskDestination", method = RequestMethod.PUT)
@@ -254,5 +291,24 @@ public class OrderController {
         } else {
             return ResponseEntity.badRequest().body("Not valid disk folder path.");
         }
+    }
+
+    @RequestMapping(
+            path = "/getNewOrderFieldsValues",
+            method = RequestMethod.GET,
+            produces = APPLICATION_JSON_VALUE
+    )
+    @JsonView(View.Short.class)
+    public ResponseEntity<?> getNewOrderFieldsValues() {
+        Map<String, Object> result = new LinkedHashMap<>();
+        List<String> scanners = scannerRepository.findAll().stream().map(Scanner::getName).collect(toList());
+        List<String> scanTypes = orderTypeRepository.findAll().stream().map(OrderType::getName).collect(toList());
+        List<ScanSize> scanSizes = scanSizeRepository.findAll();
+
+        result.put("scanners", scanners);
+        result.put("scanTypes", scanTypes);
+        result.put("scanResolution", scanSizes);
+
+        return ResponseEntity.ok(result);
     }
 }

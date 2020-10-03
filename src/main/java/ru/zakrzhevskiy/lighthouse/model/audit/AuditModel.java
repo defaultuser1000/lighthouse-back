@@ -17,18 +17,17 @@ import java.util.Date;
         value = {"creationDate", "modificationDate"},
         allowGetters = true
 )
+@JsonView({View.Short.class, View.Full.class, View.OrderUser.class})
 public abstract class AuditModel implements Serializable {
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(nullable = false, updatable = false)
     @CreatedDate
-    @JsonView({View.Short.class, View.Full.class})
     private Date creationDate;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(nullable = false)
     @LastModifiedDate
-    @JsonView({View.Short.class, View.Full.class})
     private Date modificationDate;
 
     public Date getCreationDate() {

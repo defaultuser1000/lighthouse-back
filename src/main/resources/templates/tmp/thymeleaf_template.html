@@ -1,0 +1,343 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <script src="js/qrcode.js"></script>
+    <meta charset="utf-8">
+    <link href="https://fonts.googleapis.com/css?family=Oswald&display=swap" rel="stylesheet" type="text/css">
+    <link href="css/main.css" rel="stylesheet">
+    <title th:text="'Order #' + ${orderNumber} + ' form'"></title>
+</head>
+<body>
+<div class="form-box">
+    <table class="main-table">
+        <tr>
+            <td class="first-column vertically-top" id="main-info">
+                <h2 th:text="'Заказ #' + ${orderNumber}" id="order-number"></h2>
+                <div class="field-wrap">
+                    <label for="fio" class="label">ФИО</label>
+                    <input id="fio" th:value="${userFio}"/>
+                </div>
+                <div class="field-wrap">
+                    <label for="phone" class="label">Телефон</label>
+                    <input id="phone" th:value="${userPhone}"/>
+                </div>
+                <div class="field-wrap">
+                    <label for="mail" class="label">E-mail</label>
+                    <input id="mail" th:value="${userEmail}"/>
+                </div>
+                <div class="field-wrap">
+                    <label for="insta" class="label">Instagram</label>
+                    <input id="insta" th:value="${userInstagram}"/>
+                </div>
+                <div class="left-options">
+                    <span class="label">После выполнения заказа пленку</span>
+                    <div id="option-after-order" class="selects">
+                        <div class="option">
+                            <label class="container">утилизировать
+                                <input type="checkbox" id="utilize" th:checked="${afterOrderProcessed == 'RECOVER'}"/>
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                        <div class="option">
+                            <label class="container">сохранить, заберу в течение 3 месяцев
+                                <input type="checkbox" id="save-self-return" th:checked="${afterOrderProcessed == 'SAVE'}"/>
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                        <div class="option">
+                            <label class="container">отправить после сканирования
+                                <input type="checkbox" id="send-after-scan" th:checked="${afterOrderProcessed == 'SEND_BY_MAIL'}"/>
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                        <th:block th:if="${afterOrderProcessed == 'send-after-scan'}">
+                            <div class="field-wrap address-first">
+                                <label for="address-first" class="address-label">По адресу:</label>
+                                <input id="address-first" type="text"/>
+                            </div>
+                            <div class="field-wrap">
+                                <input id="address-second" type="text"/>
+                            </div>
+                            <div class="transit-company" id="transition-company">
+                                <div class="option">
+                                    <label class="container">CDEK
+                                        <input type="checkbox" id="cdek" th:checked="${transportCompanyCode == 'cdek'}"/>
+                                        <span class="checkmark"></span>
+                                    </label>
+                                </div>
+                                <div class="option">
+                                    <label class="container">Почта России
+                                        <input type="checkbox" id="russian-post" th:checked="${transportCompanyCode == 'russian-post'}"/>
+                                        <span class="checkmark"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </th:block>
+                    </div>
+                </div>
+                <div class="scanner-options">
+                    <span class="label">Сканер</span>
+                    <div id="option-scanner-order" class="selects">
+                        <div class="option">
+                            <label class="container">Frontier
+                                <input type="checkbox" id="frontier" th:checked="${scanner.getName() == 'Frontier'}"/>
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                        <div class="option">
+                            <label class="container" id="imacon">Imacon
+                                <input type="checkbox" th:checked="${scanner.getName() == 'Imacon'}"/>
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                        <div class="option">
+                            <label class="container" id="noritsu">Noritsu
+                                <input type="checkbox" th:checked="${scanner.getName() == 'Noritsu'}"/>
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                        <div class="option">
+                            <label class="container" id="any">Доверяю выбор сканера вам
+                                <input type="checkbox" th:checked="${scanner.getName().isEmpty()}"/>
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="scanner-type-options">
+                    <span class="label">Вид сканирования</span>
+                    <div id="option-scanner-type-order" class="selects">
+                        <div class="option">
+                            <label class="container">Basic
+                                <input type="checkbox" id="basic" th:checked="${orderType.getName() == 'Basic'}"/>
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                        <div class="option">
+                            <label class="container">Premium
+                                <input type="checkbox" id="premium" th:checked="${orderType.getName() == 'Premium'}"/>
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="scan-size-options">
+                    <span class="label">Размер скана</span>
+                    <div id="option-scanner-size-order" class="selects">
+                        <div class="option">
+                            <label class="container">L
+                                <input type="checkbox" id="l-size" th:checked="${scanSize.getSize() == 'L'}"/>
+                                <span class="checkmark"></span>
+                            </label>
+                            <div class="description">
+                                <div class="line">35мм 2000*2900</div>
+                                <div class="line">120тип 2000*2600</div>
+                            </div>
+                        </div>
+                        <div class="option">
+                            <label class="container">XL
+                                <input type="checkbox" id="xl-size" th:checked="${scanSize.getSize() == 'XL'}"/>
+                                <span class="checkmark"></span>
+                            </label>
+                            <div class="description">
+                                <div class="line">35мм 3600*5400</div>
+                                <div class="line">120тип 3600*4800</div>
+                            </div>
+                        </div>
+                        <div class="option">
+                            <label class="container">TIFF
+                                <input type="checkbox" id="tiff" th:checked="${scanSize.getSize() == 'TIFF'}"/>
+                                <span class="checkmark"></span>
+                            </label>
+                            <div class="description">
+                                <div class="line">35мм 3600*5400</div>
+                                <div class="line">120тип 3600*4800</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="virtual-table">
+                    <div class="virtual-table-heading">
+                        <div class="virtual-table-head">тип пленки<br/>35/120/220</div>
+                        <div class="virtual-table-head">тип проявки<br/>C41/BW/E6</div>
+                        <div class="virtual-table-head">количество</div>
+                        <div class="virtual-table-head">размер скана<br/>L/XL/TIFF</div>
+                        <div class="virtual-table-head">push</div>
+                    </div>
+                    <div class="virtual-table-body">
+                        <div class="virtual-row" th:each="row: ${films}">
+                            <div class="virtual-cell" th:each="field: ${row}" th:text="${field.value}"></div>
+                        </div>
+                    </div>
+                </div>
+            </td>
+            <td id="logo-cell" class="vertically-top">
+                <div class="logo-container">
+                    <div class="left-logo-border"></div>
+                    <div class="logo-content">
+                        <img alt="" src="asset/logo_0.5x.png"/>
+                    </div>
+                    <div class="right-logo-border"></div>
+                </div>
+                <div class="contacts">
+                    <div class="vertical-line"></div>
+                    <div id="address">
+                        <div class="icon"><img src="asset/social_anchor.png"/></div>
+                        <div class="text">107045 г. Москва <br/>Печатников переулок, 22 <br/>Иванец Александр
+                            Александрович
+                        </div>
+                    </div>
+                    <div id="e-mail">
+                        <div class="icon"><img src="asset/social_mail.png"/></div>
+                        <div class="text">lighthouselab@mail.ru</div>
+                    </div>
+                    <div id="phone-number">
+                        <div class="icon"><img src="asset/social_phone.png"/></div>
+                        <div class="text">+7 913 457 50 07</div>
+                    </div>
+                    <div id="instagram">
+                        <div class="icon"><img src="asset/social_instagram.png"/></div>
+                        <div class="text">lighthousefilmlab</div>
+                    </div>
+                </div>
+                <div class="right-options">
+                    <span class="label">Оттенок</span>
+                    <div id="option-color-tones" class="selects">
+                        <div class="option">
+                            <label class="container">Теплый
+                                <input type="checkbox" id="warm-tone" th:checked="${colorTones.name() == 'WARM'}"/>
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                        <div class="option">
+                            <label class="container">Холодный
+                                <input type="checkbox" id="cold-tone" th:checked="${colorTones.name() == 'COLD'}"/>
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                        <div class="option">
+                            <label class="container">Нейтральный
+                                <input type="checkbox" id="neutral-tone" th:checked="${colorTones.name() == 'NEUTRAL'}"/>
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <span class="label">Контраст</span>
+                    <div id="option-contrast" class="selects">
+                        <div class="option">
+                            <label class="container">Высокий
+                                <input type="checkbox" id="high-contrast" th:checked="${contrast.name() == 'HIGH'}"/>
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                        <div class="option">
+                            <label class="container">Низкий
+                                <input type="checkbox" id="low-contrast" th:checked="${contrast.name() == 'LOW'}"/>
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                        <div class="option">
+                            <label class="container">Нейтральный
+                                <input type="checkbox" id="neutral-contrast" th:checked="${contrast.name() == 'NEUTRAL'}"/>
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <span class="label">Плотность</span>
+                    <div id="option-density" class="selects">
+                        <div class="option">
+                            <label class="container">Низкая
+                                <input type="checkbox" id="low-density" th:checked="${density.name() == 'LOW'}"/>
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                        <div class="option">
+                            <label class="container">Высокая
+                                <input type="checkbox" id="high-density" th:checked="${density.name() == 'HIGH'}"/>
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                        <div class="option">
+                            <label class="container">Нейтральная
+                                <input type="checkbox" id="neutral-density" th:checked="${density.name() == 'NEUTRAL'}"/>
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <span class="label">Рамка</span>
+                    <div id="option-frame" class="selects">
+                        <div class="option">
+                            <label class="container">Да
+                                <input type="checkbox" id="frame-yes" th:checked="${frame == true}"/>
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                        <div class="option">
+                            <label class="container">Нет
+                                <input type="checkbox" id="frame-no" th:checked="${frame == false}"/>
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="horizontal-line"></div>
+                    <span class="label">Упаковка</span>
+                    <div id="option-package" class="selects">
+                        <div class="option">
+                            <label class="container">Калька
+                                <input type="checkbox" id="package-calc" th:checked="${package.name() == 'CUT_SLIVE'}"/>
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                        <div class="option">
+                            <label class="container">Рулонный сливер
+                                <input type="checkbox" id="package-roller-sleeve" th:checked="${package.name() == 'ROLL_SLIVE'}"/>
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <span class="label">Экспресс</span>
+                    <div id="option-express" class="selects">
+                        <div class="option wide">
+                            <label class="container">+100% к стоимости заказа
+                                <input type="checkbox" id="express-yes" th:checked="${express}"/>
+                                <span class="checkmark"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td class="vertically-top">
+                <div class="preferences">
+                    <div class="label">Если у вас есть пожелания по сканированию, напишите об этом здесь</div>
+                    <div class="preferences-container">
+                        <span th:text="${special}"></span>
+                    </div>
+                </div>
+            </td>
+            <td>
+                <div class="empty">
+                    <div id="empty-left"></div>
+                    <div id="container-for-qr">
+                        <div id="qr-code"></div>
+                        <script th:inline="javascript">
+                            /*<![CDATA[*/
+                            new QRCode(document.getElementById("qr-code"), {
+                                text: /*[[${nextStatusURL}]]*/'Empty link. Use manual transition.',
+                                width: 165,
+                                height: 165,
+                                colorDark : "#5a5a5a",
+                                colorLight : "#ffffff",
+                                correctLevel : QRCode.CorrectLevel.H
+                            });
+                            /*]]>*/
+                        </script>
+                    </div>
+                    <div id="empty-right"></div>
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>
+</body>
+</html>

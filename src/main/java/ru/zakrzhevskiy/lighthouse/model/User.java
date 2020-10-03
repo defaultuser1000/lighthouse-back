@@ -3,7 +3,6 @@ package ru.zakrzhevskiy.lighthouse.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.*;
-import org.hibernate.annotations.DynamicUpdate;
 import ru.zakrzhevskiy.lighthouse.model.audit.AuditModel;
 import ru.zakrzhevskiy.lighthouse.model.views.View;
 
@@ -23,15 +22,15 @@ public class User extends AuditModel {
     @GeneratedValue
     @JsonProperty("userId")
     @Column(updatable = false, insertable = false)
-    @JsonView({View.Short.class, View.Full.class})
+    @JsonView({View.Short.class, View.Full.class, View.OrderUser.class})
     private Long id;
 
     @Column(nullable = false, unique = true)
-    @JsonView({View.Short.class, View.Full.class})
+    @JsonView({View.Short.class, View.Full.class, View.OrderUser.class})
     private String username;
 
     @Column(unique = true, nullable = false)
-    @JsonView(View.Full.class)
+    @JsonView({View.Full.class, View.OrderUser.class})
     private String eMail;
 
     @Column(nullable = false)
@@ -44,7 +43,7 @@ public class User extends AuditModel {
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "details_id", referencedColumnName = "id")
     @Builder.Default
-    @JsonView({View.Short.class, View.Full.class})
+    @JsonView({View.Short.class, View.Full.class, View.OrderUser.class})
     private MyUserDetails myUserDetails = new MyUserDetails();
 
     @ManyToMany
@@ -55,11 +54,11 @@ public class User extends AuditModel {
     @JsonView({View.Short.class, View.Full.class})
     private Set<Role> roles;
 
-    @OneToMany(mappedBy="orderOwner")
+    @OneToMany(mappedBy="orderOwner", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonView(View.Full.class)
     private Set<Order> ownedOrders;
 
-    @OneToMany(mappedBy="orderCreator")
+    @OneToMany(mappedBy="orderCreator", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonView(View.Full.class)
     private Set<Order> createdOrders;
 

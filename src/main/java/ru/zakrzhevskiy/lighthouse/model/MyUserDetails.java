@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.*;
-import org.springframework.format.annotation.DateTimeFormat;
 import ru.zakrzhevskiy.lighthouse.model.views.View;
 
 import javax.persistence.*;
@@ -76,7 +75,7 @@ public class MyUserDetails {
 //    @JoinColumn(name = "user_id")
 //    private List<ReferencePhoto> referencePhotos;
 
-    @JsonView({View.Short.class, View.Full.class})
+    @JsonView({View.Short.class, View.Full.class, View.OrderUser.class})
     public String getFIO() {
         String fio = this.firstName + " " + this.lastName;
         return secondName == null ? fio : fio.replaceAll("\\s", " " + this.secondName + " ");
