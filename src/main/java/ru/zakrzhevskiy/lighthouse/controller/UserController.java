@@ -132,8 +132,8 @@ public class UserController {
             path = "/check-auth",
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<?> checkAuth() {
-        return ResponseEntity.ok().build();
+    public ResponseEntity<?> checkAuth(Principal principal) {
+        return ResponseEntity.ok(principal);
     }
 
     @SneakyThrows

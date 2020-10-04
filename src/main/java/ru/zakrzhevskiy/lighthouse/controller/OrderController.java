@@ -262,14 +262,17 @@ public class OrderController {
             method = RequestMethod.GET
     )
     public ResponseEntity<Resource> generateOrderForm(@PathVariable Long id, Principal principal) {
-        User user = userRepository.findUserByUsername(principal.getName()).orElseThrow(NotFound::new);
+        User authenticatedUser = userRepository.findUserByUsername(principal.getName()).orElseThrow(NotFound::new);
         Order order = orderRepository.findOrderById(id);
 
-        if (!order.getOrderOwner().equals(user.getId())) {
-            throw new AccessDeniedException("You not allowed to process that order...");
+        User orderOwner = userRepository.findUserById(order.getOrderOwner().getId());
+        if (authenticatedUser.getRoles().stream().noneMatch(role -> role.getName().equals("ADMIN"))) {
+            if (!order.getOrderOwner().getId().equals(authenticatedUser.getId())) {
+                throw new AccessDeniedException("You not allowed to process that order...");
+            }
         }
 
-        File outputFile = orderFormService.generatePdf(order, user).toFile().getAbsoluteFile();
+        File outputFile = orderFormService.generatePdf(order, orderOwner).toFile().getAbsoluteFile();
 
         byte[] content = IOUtils.toByteArray(new FileInputStream(outputFile));
 
