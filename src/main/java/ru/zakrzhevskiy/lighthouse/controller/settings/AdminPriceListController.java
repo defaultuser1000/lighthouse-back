@@ -21,7 +21,7 @@ import java.net.URISyntaxException;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/admin/price-list")
+@RequestMapping("/api/admin/price-list")
 public class AdminPriceListController {
 
     private final Logger log = LoggerFactory.getLogger(AdminPriceListController.class);

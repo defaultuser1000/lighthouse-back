@@ -16,7 +16,7 @@ import java.net.URISyntaxException;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/admin/settings/scan-size")
+@RequestMapping("/api/admin/settings/scan-size")
 public class AdminScanSizeController {
 
     private final Logger log = LoggerFactory.getLogger(AdminScanSizeController.class);

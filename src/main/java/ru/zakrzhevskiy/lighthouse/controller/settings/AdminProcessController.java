@@ -16,7 +16,7 @@ import java.net.URISyntaxException;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/admin/settings/process")
+@RequestMapping("/api/admin/settings/process")
 public class AdminProcessController {
 
     private final Logger log = LoggerFactory.getLogger(AdminProcessController.class);

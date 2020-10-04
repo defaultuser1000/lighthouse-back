@@ -18,7 +18,7 @@ import java.util.Optional;
 
 
 @RestController
-@RequestMapping("/admin/settings/order-status")
+@RequestMapping("/api/admin/settings/order-status")
 public class AdminOrderStatusController {
     
     private final Logger log = LoggerFactory.getLogger(AdminOrderStatusController.class);

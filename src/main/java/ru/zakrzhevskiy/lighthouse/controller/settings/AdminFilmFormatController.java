@@ -16,7 +16,7 @@ import java.net.URISyntaxException;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/admin/settings/film-format")
+@RequestMapping("/api/admin/settings/film-format")
 public class AdminFilmFormatController {
 
     private final Logger log = LoggerFactory.getLogger(AdminFilmFormatController.class);

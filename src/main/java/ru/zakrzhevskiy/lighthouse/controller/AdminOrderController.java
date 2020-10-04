@@ -20,7 +20,7 @@ import java.security.Principal;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/admin/orders")
+@RequestMapping("/api/admin/orders")
 public class AdminOrderController {
 
     private final Logger log = LoggerFactory.getLogger(OrderController.class);

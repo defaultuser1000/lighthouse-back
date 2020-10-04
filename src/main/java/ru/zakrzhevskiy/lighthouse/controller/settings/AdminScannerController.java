@@ -17,7 +17,7 @@ import java.net.URISyntaxException;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/admin/settings/scanner")
+@RequestMapping("/api/admin/settings/scanner")
 public class AdminScannerController {
 
     private final Logger log = LoggerFactory.getLogger(AdminScannerController.class);

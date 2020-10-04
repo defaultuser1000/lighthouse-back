@@ -42,6 +42,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.csrf().disable()
                 .authorizeRequests()
                 .antMatchers(
+                        "/authenticate",
                         "/users/sign-up",
                         "/users/registrationConfirm",
                         "/users/setUserDetails",
@@ -55,7 +56,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
         http.logout(logout -> logout.logoutUrl("/users/logout")
                 .invalidateHttpSession(true)
-                .deleteCookies("SESSION"));
+                .deleteCookies("SESSION"))
+                .cors();
 
     }
 

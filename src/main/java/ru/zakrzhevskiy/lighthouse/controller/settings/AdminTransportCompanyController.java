@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/admin/settings/transport-companies")
+@RequestMapping("/api/admin/settings/transport-companies")
 public class AdminTransportCompanyController {
 
     private final Logger log = LoggerFactory.getLogger(AdminTransportCompanyController.class);

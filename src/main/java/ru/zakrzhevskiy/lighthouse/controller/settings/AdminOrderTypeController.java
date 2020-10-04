@@ -16,7 +16,7 @@ import java.net.URISyntaxException;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/admin/settings/order-type")
+@RequestMapping("/api/admin/settings/order-type")
 public class AdminOrderTypeController {
 
     private final Logger log = LoggerFactory.getLogger(AdminOrderTypeController.class);
