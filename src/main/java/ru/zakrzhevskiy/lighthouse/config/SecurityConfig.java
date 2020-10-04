@@ -53,10 +53,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and().httpBasic()
                 .authenticationEntryPoint(authEntryPoint);
 
-        http.logout(logout -> logout.logoutUrl("/api/users/logout")
-                .invalidateHttpSession(true)
-                .deleteCookies("SESSION"))
-                .cors();
+        http.logout(
+                logout -> logout.logoutUrl("/api/users/logout")
+                        .invalidateHttpSession(true)
+                        .deleteCookies("SESSION")
+        ).cors();
 
     }
 
