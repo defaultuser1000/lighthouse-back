@@ -47,15 +47,15 @@ public class MyUserDetails {
     private Date birthDay;
 
     @Column(nullable = false)
-    @JsonView(View.Full.class)
+    @JsonView({View.Full.class, View.Short.class})
     private String postalCode;
 
     @Column(nullable = false)
-    @JsonView(View.Full.class)
+    @JsonView({View.Full.class, View.Short.class})
     private String country;
 
     @Column(nullable = false)
-    @JsonView(View.Full.class)
+    @JsonView({View.Full.class, View.Short.class})
     private String city;
 
     @Column(nullable = false)

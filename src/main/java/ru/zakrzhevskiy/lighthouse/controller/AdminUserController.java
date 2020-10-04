@@ -49,7 +49,7 @@ public class AdminUserController {
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    @JsonView({View.OrderUser.class})
+    @JsonView(View.Short.class)
     public ResponseEntity<?> users(
             @RequestParam(required = false, defaultValue = "0") Integer page,
             @RequestParam(required = false, defaultValue = "20") Integer pageSize,

@@ -42,10 +42,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.csrf().disable()
                 .authorizeRequests()
                 .antMatchers(
-                        "/authenticate",
-                        "/users/sign-up",
-                        "/users/registrationConfirm",
-                        "/users/setUserDetails",
+                        "/api/users/sign-up",
+                        "/api/users/registrationConfirm",
+                        "/api/users/setUserDetails",
                         "/activationSuccess",
                         "/errorActivating"
                 ).anonymous()
@@ -54,7 +53,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and().httpBasic()
                 .authenticationEntryPoint(authEntryPoint);
 
-        http.logout(logout -> logout.logoutUrl("/users/logout")
+        http.logout(logout -> logout.logoutUrl("/api/users/logout")
                 .invalidateHttpSession(true)
                 .deleteCookies("SESSION"))
                 .cors();
