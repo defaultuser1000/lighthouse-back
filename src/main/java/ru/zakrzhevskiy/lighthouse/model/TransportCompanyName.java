@@ -19,7 +19,7 @@ public class TransportCompanyName {
 
     @Id
     @GeneratedValue
-    @JsonProperty("orderId")
+    @JsonProperty("nameId")
     @Column(updatable = false, insertable = false)
     private Long id;
     private String name;

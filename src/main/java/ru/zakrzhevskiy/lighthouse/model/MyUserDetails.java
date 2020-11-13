@@ -59,7 +59,7 @@ public class MyUserDetails {
     private String city;
 
     @Column(nullable = false)
-    @JsonView(View.Full.class)
+    @JsonView({View.Full.class, View.Short.class})
     private String address;
 
     @Column(nullable = false)

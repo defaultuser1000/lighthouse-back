@@ -28,5 +28,13 @@ public class Film extends AuditModel {
     private Integer quantity;
     private String resolution;
     private String push;
+    private String description;
+
+    @Override
+    public String toString() {
+        return description != null
+                ? String.join("_", this.getId().toString(), description)
+                : String.join("-", this.getId().toString(), this.getFilmType().toString());
+    }
 
 }

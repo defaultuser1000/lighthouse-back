@@ -109,13 +109,6 @@
             <version>2.5</version>
         </dependency>
 
-        <!-- Library for scheduled jobs tests (in future) -->
-<!--        <dependency>-->
-<!--            <groupId>org.awaitility</groupId>-->
-<!--            <artifactId>awaitility</artifactId>-->
-<!--        </dependency>-->
-
-
         <!-- HTML to PDF -->
         <dependency>
             <!-- ALWAYS required. -->
@@ -165,12 +158,19 @@
             <version>1.24.1</version>
         </dependency>
 
-        <!-- Yandex.Disk API-->
+        <!-- For storing order photos -->
         <dependency>
-            <groupId>com.yandex.android</groupId>
-            <artifactId>disk-restapi-sdk</artifactId>
-            <version>1.03</version>
+            <groupId>com.google.firebase</groupId>
+            <artifactId>firebase-admin</artifactId>
+            <version>7.0.1</version>
         </dependency>
+        <dependency>
+            <groupId>net.coobird</groupId>
+            <artifactId>thumbnailator</artifactId>
+            <version>0.4.13</version>
+        </dependency>
+        <!-- -->
+
         <dependency>
             <groupId>org.thymeleaf</groupId>
             <artifactId>thymeleaf-spring5</artifactId>

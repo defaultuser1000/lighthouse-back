@@ -22,6 +22,7 @@ public class ScheduledTasks {
     public void clearTmpCatalog() {
         logger.info("Temp catalog clear started.");
         service.clearCatalogRecursively();
+        logger.info("Temp catalog cleared successfully.");
     }
 
 }

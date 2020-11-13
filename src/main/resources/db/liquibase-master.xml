@@ -9,4 +9,5 @@
     <include file="orders_table/add_after_order_process_options.xml" relativeToChangelogFile="true"/>
     <include file="scanners_table/add_name_unique_constraint.xml" relativeToChangelogFile="true"/>
     <include file="order_types/add_name_unique_constraint.xml" relativeToChangelogFile="true"/>
+    <include file="films_table/add_description_column.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "lighthouse-fl-photo",
+  "private_key_id": "541b0addf08a514297f1f8ea06680ad32dd9985e",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCqxqpEpYuHzatm\nwuZ4u/YTf1jVlksH5SHLRjRX5KYtFTFmIDkIyLkbgW6047//8nytRKOeVxvUS2qM\nk64+RL64KhetOUnZ3Q6iU7EKMLBEs1y+W7v9/hR1WtEXIK+RsCU97UbClHX8wciv\nPZmrTdvoaDv1Z9VRyjqPsk1VtTzFhoHVsJq9VSayfReknHfYOdqIiN4DJVVS70s7\nh5h/3oDd6G+gnmHhJy5hg87H+uBpnijCDZ5LwgEbRzT85y3fI2xtFBN6RmAhu3hN\n1qn4AzXDeTYDN3pIoHYg/Fml6UMkycztVXVvZz11B7Q2A4UhpMqIqeZnCVHtrXK6\nGU/c7iHRAgMBAAECggEABMNt1GRZs/wEn+Un0I5NmtWegLakeR/nBWh75Ue3auKA\ncjzL2nbe0umVUO5ZWKZG2/5iIfSEDjPcUPd9kLcSKsjhyC8k5DLKSbTT51jcUc4+\n9ABTCg6gO3XBB0geHY4wO732j07cy6QMGPc65hBR5fWiVoIC7Tka0Q9EIPPhMhE2\nstKbRc19GkWjOXJEFn8FoQsNixM+rld0MNl666Axq0g1zW0xzS8jY9CjdbxXWre6\niIqp7AjCZYs1hihnOBowXZNji53i0kvsef8B59ceRqoMkRswkpciY40OT5tgbmma\nmVcUPyMfeITK+VfX7NPi1xGDQ0ARaLHiSbFPb8DpwQKBgQDh9pqjbjt13O1fWMBK\nEdfoB7vEAWZtDlxazRiDzdtoWSPCFdSqoKC9dXn9UY/l3IRvSm4sY2O4dY6gV30l\n0cranUOm+B/UuPttVk1RyDdpyFdn0Bm37M1DxOPDnmrYjuXP2dw1Vdvb+kCeiX6U\n6GOpVT89G9XvwfP87nXdACvNLQKBgQDBehJPwmPJg/PIHAlWj5wwHP6YTvCEVaPz\nMJSlEM5CC4HdfOyOBrIN6un9YkeI96mDpxHvkbnP4x2K7ob3vHvLivJwAjrt+XN4\nfgz/1yUg4MIfixkK7qHDoRNIod2kCHEC02DwzgJVNLgH7jmygqntz6f0QBdIS8Di\nh1p3wUL1tQKBgQCn74JgQjW41Bgqy6glpHtFPDIlazD3jju/VDyLALy3IcC8p0Lm\nCPlNtXiTd0GuASUAHV4iaT+cwOneawdcyz2rGkREXJYzn8NlMEXIqTfdy4KCahwj\nIMAxRKxOH3ejORi9UFoj3YrIQ4YxDVjhTJF9MRkNzplCVnCCI6u/MzhahQKBgQCr\nPnZyreVQeUAOP/Jr8RQW6bLV8BilqH9CQh9ush89CZ5aAbYGRxrVgrS0FoamTj51\nTixr1JmXzLdbPp+rKeKQV10Zkn/CHeX8IeUzlKNCJGztKlpx+KCo3CqLQOlBxE7y\nZ1EIEe6yp8SzEEF1JH1vBTrszsVMse/5EEAceqvfeQKBgGZbEdnHDCGOTqBmJ7IR\nN3fasFNU8uw10NuAty9VYNwvPMaIpE2qGjpEgOppH85+i06xramuEEsWp31nfIEg\nVX7QiNP+vzNJTsJNQl22LZQm4PZoVNwlmcceRtKFlIm0MoVoIo3gzd1CpthE622h\n7K5sIGeHrLwCYXaKLTV8NxB+\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-uqys3@lighthouse-fl-photo.iam.gserviceaccount.com",
+  "client_id": "103672760436097223243",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-uqys3%40lighthouse-fl-photo.iam.gserviceaccount.com"
+}

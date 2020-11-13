@@ -18,13 +18,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import ru.zakrzhevskiy.lighthouse.model.*;
+import ru.zakrzhevskiy.lighthouse.model.dto.StorageItemDto;
 import ru.zakrzhevskiy.lighthouse.model.price.OrderType;
 import ru.zakrzhevskiy.lighthouse.model.price.ScanSize;
 import ru.zakrzhevskiy.lighthouse.model.price.Scanner;
 import ru.zakrzhevskiy.lighthouse.model.views.View;
 import ru.zakrzhevskiy.lighthouse.repository.*;
 import ru.zakrzhevskiy.lighthouse.service.OrderFormService;
+import ru.zakrzhevskiy.lighthouse.service.StorageService;
 
 import javax.validation.Valid;
 import java.io.ByteArrayInputStream;
@@ -49,6 +52,8 @@ public class OrderController {
     @Autowired
     private OrderRepository orderRepository;
     @Autowired
+    private FilmRepository filmRepository;
+    @Autowired
     private MessagesRepository messagesRepository;
     @Autowired
     private OrderStatusRepository orderStatusRepository;
@@ -60,6 +65,8 @@ public class OrderController {
     private OrderTypeRepository orderTypeRepository;
     @Autowired
     private ScannerRepository scannerRepository;
+    @Autowired
+    private StorageService storageService;
 
     // Yandex.Disk base folder path
     private final String BASE_FOLDER = "";
@@ -86,7 +93,7 @@ public class OrderController {
         if (user.getRoles().stream().anyMatch(role -> role.getName().equals("ADMIN"))) {
             orders = orderRepository.findAll(PageRequest.of(page, pageSize, Sort.by(direction, sortBy)));
         } else {
-            orders = orderRepository.findByOrderOwner(user.getId(), PageRequest.of(page, pageSize, Sort.by(direction, sortBy)));
+            orders = orderRepository.findByOrderOwner(user, PageRequest.of(page, pageSize, Sort.by(direction, sortBy)));
         }
 
         return ResponseEntity.ok().body(orders);
@@ -152,7 +159,7 @@ public class OrderController {
         String username = principal.getName();
         User user = userRepository.findUserByUsername(username).get();
 
-        List<Order> orders = orderRepository.findByOrderOwner(user.getId());
+        List<Order> orders = orderRepository.findByOrderOwner(user);
 
         Map<String, Integer> ordersStatistics = new LinkedHashMap<>();
         ordersStatistics.put("All", orders.size());
@@ -169,6 +176,7 @@ public class OrderController {
             method = RequestMethod.GET,
             produces = APPLICATION_JSON_VALUE
     )
+    @JsonView(View.OrderUser.class)
     public ResponseEntity<?> getOrder(@PathVariable Long id) {
         Optional<Order> order = orderRepository.findById(id);
         return order.map(response -> ResponseEntity.ok().body(response))
@@ -294,6 +302,76 @@ public class OrderController {
         } else {
             return ResponseEntity.badRequest().body("Not valid disk folder path.");
         }
+    }
+
+    @RequestMapping(path = "/order/{id}/uploadPhoto", method = RequestMethod.POST)
+    @Transactional
+    public ResponseEntity<?> uploadFile(@PathVariable("id") Long id,
+                                        @RequestParam(name = "path", required = false) String path,
+                                        @RequestParam("files") MultipartFile... files
+    ) {
+        Order order = orderRepository.findOrderById(id);
+
+        List<StorageItemDto> fileDTO = storageService.uploadFile(order, path, files);
+
+        return new ResponseEntity<>(fileDTO, null, HttpStatus.CREATED);
+    }
+
+    @RequestMapping(path = "/order/{id}/getPhotos", method = RequestMethod.GET)
+    @Transactional
+    public ResponseEntity<?> listOrderPhotos(@PathVariable("id") Long id,
+                                             @RequestParam(name = "additionalPath", required = false) String additionalPath
+    ) {
+        Order order = orderRepository.findOrderById(id);
+
+        List<StorageItemDto> items = storageService.listDirContent(order, additionalPath);
+
+        return ResponseEntity.ok(items);
+    }
+
+    @RequestMapping(path = "/order/{id}/editPhotos", method = RequestMethod.PUT)
+    @Transactional
+    public ResponseEntity<?> editOrderPhotos(@PathVariable("id") Long id,
+                                             @RequestParam(name = "path", required = false) String path,
+                                             @RequestParam("files") MultipartFile... files
+    ) {
+        Order order = orderRepository.findOrderById(id);
+
+//        storageService.
+
+        return ResponseEntity.ok().build();
+    }
+
+    @SneakyThrows
+    @Transactional
+    @RequestMapping(
+            path = "/order/{id}/downloadPhotos",
+            method = RequestMethod.GET,
+            produces = "application/zip"
+    )
+    public ResponseEntity<Object> downloadArchive(@PathVariable("id") Long id,
+                                                  @RequestParam(name = "path", required = false) String path
+    ) {
+        Order order = orderRepository.findOrderById(id);
+
+        String basePath = String.join(
+                "/",
+                "ready",
+                order.getOrderOwner().getUsername(),
+                order.getOrderNumber().toString()
+        ) + (path != null ? "/" + path : "");
+
+        return storageService.downloadFile(basePath + "/");
+    }
+
+    @RequestMapping(path = "/order/{id}/deletePhotos", method = RequestMethod.DELETE, consumes = APPLICATION_JSON_VALUE)
+    @Transactional
+    public ResponseEntity<?> deleteFiles(@PathVariable("id") Long id, @Valid @RequestBody String... files) {
+        Order order = orderRepository.findOrderById(id);
+
+        storageService.deleteFiles(order, files);
+
+        return ResponseEntity.ok().build();
     }
 
     @RequestMapping(
