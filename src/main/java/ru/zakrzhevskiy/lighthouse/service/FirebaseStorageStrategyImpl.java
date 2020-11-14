@@ -5,7 +5,6 @@ import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.ReadChannel;
 import com.google.cloud.storage.*;
 import com.google.gson.Gson;
-import com.google.gson.stream.JsonReader;
 import net.coobird.thumbnailator.Thumbnails;
 import org.apache.commons.io.IOUtils;
 import org.apache.groovy.util.Maps;
@@ -17,6 +16,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.multipart.MultipartFile;
 import ru.zakrzhevskiy.lighthouse.model.FirebaseCredential;
 import ru.zakrzhevskiy.lighthouse.model.Order;
@@ -56,9 +56,10 @@ public class FirebaseStorageStrategyImpl implements StorageStrategy {
     FirebaseStorageStrategyImpl() throws IOException {
         Gson gson = new Gson();
 
-        File credPath = new ClassPathResource(this.ADMINSDK_JSON).getFile();
-        JsonReader reader = new JsonReader(new FileReader(credPath));
-        this.firebaseCredential = gson.fromJson(reader, FirebaseCredential.class);
+        InputStream credIS = new ClassPathResource(this.ADMINSDK_JSON).getInputStream();
+        byte[] bcontent = FileCopyUtils.copyToByteArray(credIS);
+        String content = new String(bcontent, StandardCharsets.UTF_8);
+        this.firebaseCredential = gson.fromJson(content, FirebaseCredential.class);
     }
 
     @PostConstruct
