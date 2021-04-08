@@ -32,7 +32,9 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.io.IOException;
 import java.security.Principal;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.springframework.http.HttpStatus.*;
 
@@ -63,10 +65,16 @@ public class UserController {
     @Transactional
     public ResponseEntity<?> signUp(@Valid @RequestBody User user, HttpServletRequest request) {
 
+        Set<Object> errorCodes = new HashSet<>();
         if (usernameExist(user.getUsername())) {
-            return ResponseEntity.status(CONFLICT).body("Username");
-        } else if (emailExist(user.getEMail())) {
-            return ResponseEntity.status(CONFLICT).body("E-Mail");
+            errorCodes.add(1001);
+        }
+        if (emailExist(user.getEMail())) {
+            errorCodes.add(1002);
+        }
+
+        if (!errorCodes.isEmpty()) {
+            return ResponseEntity.status(CONFLICT).body(errorCodes);
         } else {
             User result = userService.registerNewUserAccount(user);
             eventPublisher.publishEvent(
@@ -76,7 +84,6 @@ public class UserController {
 
             return ResponseEntity.status(CREATED).body(token.getToken());
         }
-
     }
     private boolean usernameExist(String username) {
         return userRepository.findUserByUsername(username).isPresent();

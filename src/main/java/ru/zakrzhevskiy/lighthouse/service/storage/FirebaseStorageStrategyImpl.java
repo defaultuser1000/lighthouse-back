@@ -1,12 +1,10 @@
-package ru.zakrzhevskiy.lighthouse.service;
+package ru.zakrzhevskiy.lighthouse.service.storage;
 
 import com.google.api.gax.paging.Page;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.ReadChannel;
 import com.google.cloud.storage.*;
 import com.google.gson.Gson;
-import net.coobird.thumbnailator.Thumbnails;
-import org.apache.commons.io.IOUtils;
 import org.apache.groovy.util.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +21,6 @@ import ru.zakrzhevskiy.lighthouse.model.Order;
 import ru.zakrzhevskiy.lighthouse.model.dto.StorageItemDto;
 
 import javax.annotation.PostConstruct;
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.channels.Channels;
@@ -35,17 +32,17 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
+import static ru.zakrzhevskiy.lighthouse.service.storage.StorageConstants.READY;
+import static ru.zakrzhevskiy.lighthouse.service.storage.StorageConstants.THUMBNAILS_DIR_NAME;
+import static ru.zakrzhevskiy.lighthouse.service.storage.StorageHelper.*;
 
-@Service
+@Service("Firebase")
 public class FirebaseStorageStrategyImpl implements StorageStrategy {
+
+    private final Logger logger = LoggerFactory.getLogger(FirebaseStorageStrategyImpl.class);
 
     @Value("${temp.catalog.path}")
     private String tempPath;
-
-    private static int recursionDepth = 0;
-    public static final String THUMBNAILS_DIR_NAME = "thumbnails";
-    private final Logger logger = LoggerFactory.getLogger(FirebaseStorageStrategyImpl.class);
 
     private final String ADMINSDK_JSON = "lighthouse-fl-photo-firebase-storage.json";
     private final FirebaseCredential firebaseCredential;
@@ -53,7 +50,7 @@ public class FirebaseStorageStrategyImpl implements StorageStrategy {
     private StorageOptions storageOptions;
     private String bucketName = "lighthouse-fl-photo.appspot.com";
 
-    FirebaseStorageStrategyImpl() throws IOException {
+    public FirebaseStorageStrategyImpl() throws IOException {
         Gson gson = new Gson();
 
         InputStream credIS = new ClassPathResource(this.ADMINSDK_JSON).getInputStream();
@@ -74,6 +71,26 @@ public class FirebaseStorageStrategyImpl implements StorageStrategy {
     }
 
     @Override
+    public void createFolder(Order order, String additionalPath) {
+        Storage storage = storageOptions.getService();
+
+        String clientName = order.getOrderOwner().getUsername();
+        String orderNumber = String.valueOf(order.getOrderNumber());
+
+        String newFolderPath = String.join(
+                "/",
+                READY, clientName, orderNumber, additionalPath
+        ) + "/";
+
+        BlobId folderBlobId = BlobId.of(bucketName, newFolderPath);
+        BlobInfo blobInfo = BlobInfo.newBuilder(folderBlobId)
+                .setContentType(null)
+                .build();
+
+        storage.create(blobInfo);
+    }
+
+    @Override
     public List<StorageItemDto> uploadFiles(Order order, String additionalPath, MultipartFile... multipartFiles) {
         logger.debug("bucket name====" + bucketName);
         Map<String, Map<String, Object>> files = convertMultiPartToFilesMap(multipartFiles);
@@ -86,31 +103,21 @@ public class FirebaseStorageStrategyImpl implements StorageStrategy {
         List<StorageItemDto> savedFiles = new ArrayList<>();
 
         files.forEach((key, value) -> {
-            String additionalPathString = additionalPath != null && !additionalPath.isEmpty() ? additionalPath + "/" : "";
+            String additionalPathString = additionalPath != null && !additionalPath.isEmpty()
+                    ? additionalPath + "/" : "";
 
             String originalPathToSave = String.join(
                     "/",
-                    "ready", clientName, orderNumber, (additionalPathString + key)
+                    READY, clientName, orderNumber, (additionalPathString + key)
             );
 
             String thumbnailPathToSave = String.join(
                     "/",
-                    "ready", clientName, orderNumber, (additionalPathString + THUMBNAILS_DIR_NAME), key
+                    READY, clientName, orderNumber, (additionalPathString + THUMBNAILS_DIR_NAME), key
             );
 
             File file = (File) value.get("file");
-
-            BufferedImage originalImage;
-            BufferedImage thumbnail = null;
-            try {
-                originalImage = ImageIO.read(file);
-                int targetWidth = 250;
-                int targetHeight = originalImage.getHeight() / (originalImage.getWidth() / 250);
-                thumbnail = resizeImage(originalImage, targetWidth, targetHeight);
-            } catch (Exception e) {
-                logger.error("Failed to create thumbnail", e);
-            }
-
+            BufferedImage thumbnail = createThumbnailImage(file);
             String contentType = (String) value.get("contentType");
 
             BlobId originBlobId = BlobId.of(bucketName, originalPathToSave);
@@ -153,7 +160,7 @@ public class FirebaseStorageStrategyImpl implements StorageStrategy {
 
         String basePath = String.join(
                 "/",
-                "ready", clientName, orderNumber, "");
+                READY, clientName, orderNumber, "");
 
         List<BlobId> blobIds = new ArrayList<>();
 
@@ -170,29 +177,6 @@ public class FirebaseStorageStrategyImpl implements StorageStrategy {
         }
 
         return storage.delete(blobIds).stream().noneMatch(result -> result.equals(false));
-    }
-
-
-    private byte[] bufferedImageToByteArray(BufferedImage image) throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ImageIO.write(image, "jpg", baos);
-        baos.flush();
-        byte[] imageInByte = baos.toByteArray();
-        baos.close();
-
-        return imageInByte;
-    }
-
-    private BufferedImage resizeImage(BufferedImage originalImage, int targetWidth, int targetHeight) throws Exception {
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        Thumbnails.of(originalImage)
-                .size(targetWidth, targetHeight)
-                .outputFormat("JPEG")
-                .outputQuality(1)
-                .toOutputStream(outputStream);
-        byte[] data = outputStream.toByteArray();
-        ByteArrayInputStream inputStream = new ByteArrayInputStream(data);
-        return ImageIO.read(inputStream);
     }
 
     @Override
@@ -241,23 +225,24 @@ public class FirebaseStorageStrategyImpl implements StorageStrategy {
                     zipOut.putNextEntry(new ZipEntry(fileName + "/"));
                     zipOut.closeEntry();
                 }
-                recursionDepth++;
+
                 zipFiles(path + fileName + "/", subFoldersPath + fileName + "/", zipOut);
-                recursionDepth--;
 
-                return;
-            }
-            ReadChannel reader = blob.reader();
-            InputStream inputStream = Channels.newInputStream(reader);
+            } else if (blob.getContentType().matches("image/.*")) {
 
-            ZipEntry zipEntry = new ZipEntry(subFoldersPath + fileName);
-            zipOut.putNextEntry(zipEntry);
-            byte[] bytes = new byte[1024];
-            int length;
-            while ((length = inputStream.read(bytes)) >= 0) {
-                zipOut.write(bytes, 0, length);
+                ReadChannel reader = blob.reader();
+                InputStream inputStream = Channels.newInputStream(reader);
+
+                ZipEntry zipEntry = new ZipEntry(subFoldersPath + fileName);
+                zipOut.putNextEntry(zipEntry);
+                byte[] bytes = new byte[1024];
+                int length;
+                while ((length = inputStream.read(bytes)) >= 0) {
+                    zipOut.write(bytes, 0, length);
+                }
+                inputStream.close();
+
             }
-            inputStream.close();
         }
     }
 
@@ -321,29 +306,6 @@ public class FirebaseStorageStrategyImpl implements StorageStrategy {
         String thumbnailPath = String.join("/", thumbnailPathParts);
         BlobId thumbBlobId = BlobId.of(bucketName, thumbnailPath);
         return storage.get(thumbBlobId);
-    }
-
-    private Map<String, Map<String, Object>> convertMultiPartToFilesMap(MultipartFile... files) {
-        return Arrays.stream(files).collect(toMap(this::generateFileName, value -> {
-            File convertedFile = new File(Objects.requireNonNull(value.getOriginalFilename()));
-            FileOutputStream fos;
-            try {
-                fos = new FileOutputStream(convertedFile);
-                fos.write(value.getBytes());
-                fos.close();
-            } catch (IOException e) {
-                logger.error("Failed to convert MultipartFile to File", e);
-            }
-            return Maps.of("contentType", value.getContentType(), "file", convertedFile);
-        }));
-    }
-
-    private String generateFileName(MultipartFile multiPart) {
-        return Objects.requireNonNull(multiPart.getOriginalFilename()).replace(" ", "_");
-    }
-
-    public InputStream getFirebaseCredentials() throws Exception {
-        return IOUtils.toInputStream(new Gson().toJson(this.firebaseCredential), StandardCharsets.UTF_8);
     }
 
 }

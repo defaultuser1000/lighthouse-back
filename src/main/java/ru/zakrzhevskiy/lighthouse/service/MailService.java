@@ -176,7 +176,7 @@ public class MailService {
 
         String recipientAddress = user.getEMail();
         String subject = messages.getMessage("message.regSuccessful.subject", null, event.getLocale());
-        String confirmationUrl = appUrl + "/users/registrationConfirm?token=" + token;
+        String confirmationUrl = appUrl + "/api/users/registrationConfirm?token=" + token;
         String messageText = messages.getMessage("message.regSuccessful.text", null, event.getLocale());
         String linkText = messages.getMessage("message.regSuccessful.linkText", null, event.getLocale());
 

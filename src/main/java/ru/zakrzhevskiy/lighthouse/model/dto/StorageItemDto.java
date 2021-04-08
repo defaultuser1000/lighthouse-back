@@ -8,6 +8,10 @@ public class StorageItemDto {
     private String contentType;
     private long size;
 
+    public StorageItemDto() {
+
+    }
+
     public StorageItemDto(String itemName, String url, String thumbnailUrl, String contentType, long size) {
         this.itemName = itemName;
         this.url = url;

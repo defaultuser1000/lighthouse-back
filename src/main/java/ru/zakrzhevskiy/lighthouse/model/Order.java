@@ -83,4 +83,8 @@ public class Order extends AuditModel {
     private TransportCompany transportCompany;
 
     private String orderDiskDestination;
+
+    public String toString() {
+        return "Order[" + this.orderNumber + "]";
+    }
 }

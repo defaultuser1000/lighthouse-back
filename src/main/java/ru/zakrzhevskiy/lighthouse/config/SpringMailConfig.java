@@ -1,17 +1,12 @@
 package ru.zakrzhevskiy.lighthouse.config;
 
-import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.EnvironmentAware;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.context.support.ResourceBundleMessageSource;
-import org.springframework.core.env.Environment;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.thymeleaf.TemplateEngine;
@@ -21,50 +16,28 @@ import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 import org.thymeleaf.templateresolver.ITemplateResolver;
 import org.thymeleaf.templateresolver.StringTemplateResolver;
 
-import java.io.IOException;
 import java.util.Collections;
-import java.util.Properties;
 
 @Configuration
-@PropertySource("classpath:mail/email_config.properties")
-public class SpringMailConfig implements ApplicationContextAware, EnvironmentAware {
+public class SpringMailConfig {
 
     public static final String EMAIL_TEMPLATE_ENCODING = "UTF-8";
 
-    private static final String JAVA_MAIL_FILE = "classpath:mail/javamail.properties";
-
-    private static final String HOST = "spring.mail.host";
-    private static final String USERNAME = "spring.mail.username";
-    private static final String PASSWORD = "spring.mail.password";
-
-
-    private ApplicationContext applicationContext;
-    private Environment environment;
-
-    @Override
-    public void setApplicationContext(final ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = applicationContext;
-    }
-
-    @Override
-    public void setEnvironment(final Environment environment) {
-        this.environment = environment;
-    }
+    @Value("${spring.mail.host}")
+    private String host;
+    @Value("${spring.mail.username}")
+    private String username;
+    @Value("${spring.mail.password}")
+    private String password;
 
     @Bean
-    public JavaMailSender mailSender() throws IOException {
+    public JavaMailSender mailSender() {
 
         final JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
 
-        // Basic mail sender configuration, based on emailconfig.properties
-        mailSender.setHost(this.environment.getProperty(HOST));
-        mailSender.setUsername(this.environment.getProperty(USERNAME));
-        mailSender.setPassword(this.environment.getProperty(PASSWORD));
-
-        // JavaMail-specific mail sender configuration, based on javamail.properties
-        final Properties javaMailProperties = new Properties();
-        javaMailProperties.load(this.applicationContext.getResource(JAVA_MAIL_FILE).getInputStream());
-        mailSender.setJavaMailProperties(javaMailProperties);
+        mailSender.setHost(host);
+        mailSender.setUsername(username);
+        mailSender.setPassword(password);
 
         return mailSender;
 

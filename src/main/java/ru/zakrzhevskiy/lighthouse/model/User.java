@@ -2,6 +2,7 @@ package ru.zakrzhevskiy.lighthouse.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
+import com.google.gson.annotations.SerializedName;
 import lombok.*;
 import ru.zakrzhevskiy.lighthouse.model.audit.AuditModel;
 import ru.zakrzhevskiy.lighthouse.model.views.View;
@@ -31,6 +32,7 @@ public class User extends AuditModel {
 
     @Column(unique = true, nullable = false)
     @JsonView({View.Full.class, View.OrderUser.class})
+    @SerializedName(value = "eMail", alternate = {"email"})
     private String eMail;
 
     @Column(nullable = false)
@@ -63,6 +65,7 @@ public class User extends AuditModel {
     private Set<Order> createdOrders;
 
     @Builder.Default
+    @SerializedName("acceptTerms")
     @JsonView({View.Short.class, View.Full.class})
     private Boolean termsOfConditionsAccepted = false;
 

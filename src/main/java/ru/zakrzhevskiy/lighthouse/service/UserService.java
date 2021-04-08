@@ -53,6 +53,7 @@ public class UserService implements IUserService {
         roles.add(roleRepository.findByName("USER"));
         user.setRoles(roles);
         user.setMyUserDetails(null);
+        user.setEnabled(false);
 
         return repository.save(user);
     }

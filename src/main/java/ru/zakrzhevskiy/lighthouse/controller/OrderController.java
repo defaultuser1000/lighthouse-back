@@ -27,7 +27,7 @@ import ru.zakrzhevskiy.lighthouse.model.price.Scanner;
 import ru.zakrzhevskiy.lighthouse.model.views.View;
 import ru.zakrzhevskiy.lighthouse.repository.*;
 import ru.zakrzhevskiy.lighthouse.service.OrderFormService;
-import ru.zakrzhevskiy.lighthouse.service.StorageService;
+import ru.zakrzhevskiy.lighthouse.service.storage.StorageService;
 
 import javax.validation.Valid;
 import java.io.ByteArrayInputStream;
@@ -302,6 +302,17 @@ public class OrderController {
         } else {
             return ResponseEntity.badRequest().body("Not valid disk folder path.");
         }
+    }
+
+    @RequestMapping(path = "/order/{id}/createFolder", method = RequestMethod.POST)
+    @Transactional
+    public ResponseEntity<?> createFolder(@PathVariable("id") Long id,
+                                          @RequestParam(name = "path", required = false) String path) {
+        Order order = orderRepository.findOrderById(id);
+
+        storageService.createFolder(order, path);
+
+        return new ResponseEntity<>(null, null, HttpStatus.CREATED);
     }
 
     @RequestMapping(path = "/order/{id}/uploadPhoto", method = RequestMethod.POST)
